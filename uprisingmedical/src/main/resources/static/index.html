@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uprising Medical - Connecting Engineers to Medical Innovation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: #0a1a2f; color: #e0e6f0; overflow-x: hidden; }
+        nav { background: rgba(15, 25, 40, 0.95); position: sticky; top: 0; z-index: 1000; padding: 1rem 0; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { font-size: 1.5rem; font-weight: bold; background: linear-gradient(45deg, #667eea, #764ba2);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        .nav-links { display: flex; list-style: none; gap: 1.5rem; }
+        .nav-links a { text-decoration: none; color: #e0e6f0; padding: 0.5rem 1rem; border-radius: 6px; transition: background 0.3s ease; }
+        .nav-links a:hover { background: rgba(102, 126, 234, 0.2); }
+        .mobile-menu { display: none; flex-direction: column; cursor: pointer; }
+        .mobile-menu span { width: 25px; height: 3px; background: #e0e6f0; margin: 4px 0; }
+        .content-section { display: none; padding: 3rem 1rem; }
+        .content-section.active { display: block; }
+        .hero { height: 90vh; display: flex; align-items: center; justify-content: center; text-align: center;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; margin: 2rem auto;
+                max-width: 1000px; padding: 2rem; }
+        .hero h1 { font-size: 3rem; color: #fff; margin-bottom: 1rem; }
+        .hero p { font-size: 1.3rem; color: #e0e6f0; }
+        .stat-card, .about-card, .team-member { background: #1b2b47; border: 1px solid #33415c; border-radius: 12px;
+                padding: 1.5rem; margin: 1rem 0; }
+        #problemForm input, #problemForm textarea, #problemForm select, #signupForm input, #signupForm select, #loginForm input {
+            padding: 0.7rem; border-radius: 6px; border: 1px solid #33415c; background: #1b2b47; color: #e0e6f0; font-size: 1rem;
+        }
+        button { background: #4a90e2; border: none; color: white; padding: 0.75rem; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #3578d4; }
+        footer { background: #081526; color: #cdd6e5; text-align: center; padding: 2rem 0; margin-top: 3rem; }
+        @media (max-width: 768px) {
+            .nav-links { display: none; flex-direction: column; background: #0a1a2f; width: 100%; position: absolute; top: 60px; left: 0; padding: 1rem; }
+            .mobile-menu { display: flex; }
+        }
+    </style>
+    
+</head>
+<body>
+<nav>
+    <div class="nav-container">
+        <div class="logo">Uprising Medical</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showSection('home')">Home</a></li>
+            <li><a href="#" onclick="showSection('about')">About</a></li>
+            <li><a href="#" onclick="showSection('challenges')">Challenges</a></li>
+            <li><a href="#" onclick="showSection('submit')">Submit a Problem</a></li>
+            <li><a href="#" onclick="showSection('teams')">Teams</a></li>
+            <li><a href="#" onclick="showSection('login')">Login</a></li>
+            <li><a href="#" onclick="showSection('signup')">Sign Up</a></li>
+            <li id="adminNav" style="display:none;">
+                <a href="#" onclick="showSection('admin'); loadPendingProblems();">Admin</a>
+            </li>
+        </ul>
+        <div class="mobile-menu" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+    </div>
+</nav>
+
+<section id="home" class="content-section active">
+    <div class="hero">
+        <div>
+            <h1>Uprising Medical</h1>
+            <p>Connecting Engineers to Solve Real-World Medical Challenges</p>
+            <button onclick="showSection('submit')">Submit a Problem</button>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="content-section">
+    <div class="about-card">
+        <h2>Our Mission</h2>
+        <p>We connect medical professionals with engineering students to solve healthcare challenges.</p>
+    </div>
+</section>
+
+<section id="submit" class="content-section">
+    <h2 style="text-align:center; color:#4a90e2; margin-bottom:1rem;">Submit a Problem</h2>
+    <form id="problemForm" style="
+        max-width: 500px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background: #1b2b47;
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid #33415c;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    ">
+        <input type="text" id="title" placeholder="Problem Title" required style="
+            padding:0.7rem;
+            border-radius:6px;
+            border:1px solid #33415c;
+            background:#101c36;
+            color:#e0e6f0;
+            font-size:1rem;
+        ">
+        <textarea id="description" placeholder="Describe the problem..." rows="5" required style="
+            padding:0.7rem;
+            border-radius:6px;
+            border:1px solid #33415c;
+            background:#101c36;
+            color:#e0e6f0;
+            font-size:1rem;
+        "></textarea>
+        <select id="category" required style="
+            padding:0.7rem;
+            border-radius:6px;
+            border:1px solid #33415c;
+            background:#101c36;
+            color:#e0e6f0;
+            font-size:1rem;
+        ">
+            <option value="">Select a category</option>
+            <option value="Diagnostics">Diagnostics</option>
+            <option value="Prosthetics">Prosthetics</option>
+            <option value="Software">Software</option>
+            <option value="Medical Device">Medical Device</option>
+        </select>
+        <button type="submit" style="
+            background: linear-gradient(45deg, #4a90e2, #6a5acd);
+            color:white;
+            padding:0.8rem;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:1rem;
+            transition:all 0.3s ease;
+        " onmouseover="this.style.transform='translateY(-2px)'" 
+           onmouseout="this.style.transform='translateY(0)'">
+            Submit Problem
+        </button>
+    </form>
+    <p id="formMessage" style="text-align:center; margin-top:1rem; color:#cdd6e5;"></p>
+</section>
+
+<section id="challenges" class="content-section">
+    <h2 style="text-align:center;">Open Challenges</h2>
+    <div id="challengesList"></div>
+</section>
+
+<!-- Admin Page -->
+<section id="admin" class="content-section">
+    <h2 style="text-align:center;">Admin Panel</h2>
+
+    <!-- Create Team -->
+    <div style="max-width:500px; margin:2rem auto; background:#1b2b47; padding:1.5rem; border-radius:12px; border:1px solid #33415c;">
+        <h3 style="color:#4a90e2;">Create a New Team</h3>
+        <form id="createTeamForm" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+            <input type="text" id="teamNameCreate" placeholder="Team Name" required>
+            <textarea id="teamDescCreate" placeholder="Describe your team..." rows="3"></textarea>
+            <button type="submit" style="background:#4a90e2; color:white; padding:0.7rem; border:none; border-radius:6px;">Create Team</button>
+        </form>
+        <p id="createTeamMessage" style="text-align:center; margin-top:1rem;"></p>
+    </div>
+
+    <!-- Pending Join Requests -->
+    <div style="max-width:700px; margin:2rem auto;">
+        <h3 style="color:#4a90e2;">Pending Join Requests</h3>
+        <div id="joinRequests" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+            <!-- Requests will be loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- Pending Problem Approvals -->
+    <div style="max-width:700px; margin:2rem auto;">
+        <h3 style="color:#4a90e2;">Pending Problem Approvals</h3>
+        <div id="pendingProblems" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+            <!-- Problems will be loaded dynamically -->
+        </div>
+    </div>
+
+</section>
+
+<section id="signup" class="content-section">
+    <h2 style="text-align:center;">Sign Up</h2>
+    <form id="signupForm">
+        <input type="text" id="signupUsername" placeholder="Username" required>
+        <input type="password" id="signupPassword" placeholder="Password" required>
+        <select id="signupRole" required>
+            <option value="">Select Role</option>
+            <option value="STUDENT">Student</option>
+            <option value="ADMIN">Admin</option>
+        </select>
+        <button type="submit">Sign Up</button>
+    </form>
+    <p id="signupMessage" style="text-align:center; margin-top:1rem;"></p>
+</section>
+
+<section id="teams" class="content-section">
+    <h2 style="text-align:center;">Available Teams</h2>
+    <div id="teamsList" style="max-width:600px; margin:auto; display:flex; flex-direction:column; gap:1rem;">
+        <!-- Teams will be loaded dynamically -->
+    </div>
+</section>
+
+<section id="login" class="content-section">
+    <h2 style="text-align:center;">Login</h2>
+    <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Username" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p id="loginMessage" style="text-align:center; margin-top:1rem;"></p>
+</section>
+
+<footer><p>&copy; 2025 Uprising Medical</p></footer>
+
+<script>
+// Navigation
+function showSection(sectionId) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function toggleMenu() {
+    const navLinks = document.querySelector('.nav-links');
+    navLinks.style.display = (navLinks.style.display === 'flex') ? 'none' : 'flex';
+}
+
+// Submit Problem
+document.getElementById("problemForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const data = {
+        title: document.getElementById("title").value,
+        description: document.getElementById("description").value,
+        category: document.getElementById("category").value
+    };
+    try {
+        const response = await fetch("http://localhost:8080/problems", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+        document.getElementById("formMessage").textContent = response.ok
+            ? "Problem submitted! Awaiting admin approval."
+            : "Error submitting problem.";
+        if (response.ok) this.reset();
+    } catch {
+        document.getElementById("formMessage").textContent = "Unable to connect to server.";
+    }
+});
+
+// Load Challenges
+async function loadChallenges() {
+    const container = document.getElementById("challengesList");
+    container.innerHTML = "<p>Loading challenges...</p>";
+    try {
+        const res = await fetch("http://localhost:8080/problems");
+        const problems = await res.json();
+        container.innerHTML = problems.length === 0
+            ? "<p>No approved challenges yet.</p>"
+            : problems.map(p => `
+                <div style="background:#1b2b47; padding:1rem; border-radius:8px; border:1px solid #33415c;">
+                    <h3 style="color:#4a90e2;">${p.title}</h3>
+                    <p>${p.description}</p>
+                    <small style="color:#cdd6e5;">Category: ${p.category}</small>
+                </div>`).join("");
+    } catch {
+        container.innerHTML = "<p style='color:red;'>Error loading challenges.</p>";
+    }
+}
+
+// Load Pending Problems
+async function loadPendingProblems() {
+    const container = document.getElementById("pendingProblems");
+    container.innerHTML = "<p>Loading pending problems...</p>";
+    try {
+        const res = await fetch("http://localhost:8080/problems/pending");
+        const problems = await res.json();
+        container.innerHTML = problems.length === 0
+            ? "<p>No pending problems.</p>"
+            : "";
+        problems.forEach(p => {
+            const card = document.createElement("div");
+            card.style = "padding:1rem; margin:1rem 0; border:1px solid #33415c; background:#1b2b47; border-radius:8px;";
+            card.innerHTML = `
+                <h3>${p.title}</h3>
+                <p><strong>Category:</strong> ${p.category}</p>
+                <p>${p.description}</p>
+                <button onclick="approveProblem(${p.id})">Approve</button>`;
+            container.appendChild(card);
+        });
+    } catch {
+        container.innerHTML = "<p style='color:red;'>Error loading pending problems.</p>";
+    }
+}
+
+// Approve Problem
+async function approveProblem(id) {
+    try {
+        const res = await fetch(`http://localhost:8080/problems/${id}/approve`, { method: "PATCH" });
+        if (res.ok) {
+            alert("Problem approved!");
+            loadPendingProblems();
+            loadChallenges();
+        } else {
+            alert("Failed to approve problem.");
+        }
+    } catch {
+        alert("Error approving problem.");
+    }
+}
+
+// Sign Up
+document.getElementById("signupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const res = await fetch("http://localhost:8080/auth/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            username: document.getElementById("signupUsername").value,
+            password: document.getElementById("signupPassword").value,
+            role: document.getElementById("signupRole").value
+        })
+    });
+    document.getElementById("signupMessage").textContent = res.ok
+        ? "Account created successfully!"
+        : "Error creating account.";
+    if (res.ok) this.reset();
+});
+
+// Login
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const username = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
+    try {
+        const res = await fetch("http://localhost:8080/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ username, password })
+        });
+        const text = await res.text();
+        if (res.ok) {
+            document.getElementById("loginMessage").textContent = text;
+            if (text.includes("ADMIN")) {
+                document.getElementById("adminNav").style.display = "inline-block";
+            }
+        } else {
+            document.getElementById("loginMessage").textContent = "Invalid username or password.";
+        }
+    } catch {
+        document.getElementById("loginMessage").textContent = "Failed to connect to server.";
+    }
+});
+
+// Create Team (Admin Only)
+document.getElementById("createTeamForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const data = {
+        name: document.getElementById("teamNameCreate").value,
+        description: document.getElementById("teamDescCreate").value
+    };
+
+    try {
+        const res = await fetch("http://localhost:8080/teams", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        document.getElementById("createTeamMessage").textContent = res.ok
+            ? "Team created successfully!"
+            : "Failed to create team.";
+        if (res.ok) {
+            this.reset();
+            loadTeams(); // refresh team list
+        }
+    } catch {
+        document.getElementById("createTeamMessage").textContent = "Unable to connect to server.";
+    }
+});
+
+// Load Teams (for Teams Page)
+async function loadTeams() {
+    const container = document.getElementById("teamsList");
+    container.innerHTML = "<p>Loading teams...</p>";
+    try {
+        const res = await fetch("http://localhost:8080/teams");
+        const teams = await res.json();
+        container.innerHTML = teams.length === 0
+            ? "<p>No teams yet.</p>"
+            : teams.map(team => `
+                <div style="background:#1b2b47; padding:1rem; border-radius:8px; border:1px solid #33415c;">
+                    <h3 style="color:#4a90e2;">${team.name}</h3>
+                    <p>${team.description || "No description provided."}</p>
+                    <button onclick="requestToJoin(${team.id})" style="margin-top:0.5rem; background:#4a90e2; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">Request to Join</button>
+                </div>
+            `).join("");
+    } catch {
+        container.innerHTML = "<p style='color:red;'>Error loading teams.</p>";
+    }
+}
+
+// User Requests to Join Team
+async function requestToJoin(teamId) {
+    const username = document.getElementById("loginUsername").value || localStorage.getItem("username");
+    if (!username) {
+        alert("Please log in before sending a join request.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:8080/teams/${teamId}/request`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username })
+        });
+        alert(res.ok ? "Request sent to admin!" : "Failed to send join request.");
+    } catch {
+        alert("Unable to send join request.");
+    }
+}
+
+
+// Load Pending Join Requests (Admin Page)
+async function loadJoinRequests() {
+    const container = document.getElementById("joinRequests");
+    container.innerHTML = "<p>Loading requests...</p>";
+    try {
+        const res = await fetch("http://localhost:8080/teams/pending");
+        const requests = await res.json();
+        container.innerHTML = requests.length === 0
+            ? "<p>No pending requests.</p>"
+            : "";
+        requests.forEach(req => {
+            const card = document.createElement("div");
+            card.style = "padding:1rem; background:#1b2b47; border-radius:8px; border:1px solid #33415c;";
+            card.innerHTML = `
+                <p><strong>User:</strong> ${req.username}</p>
+                <p><strong>Team:</strong> ${req.team?.name || "Unknown"}</p>
+                <button onclick="approveJoin(${req.id})" style="background:#4a90e2; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; margin-right:0.5rem;">Approve</button>
+                <button onclick="denyJoin(${req.id})" style="background:#d9534f; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">Deny</button>
+            `;
+            container.appendChild(card);
+        });
+    } catch {
+        container.innerHTML = "<p style='color:red;'>Error loading requests.</p>";
+    }
+}
+
+// Approve/Deny Join Requests (Admin)
+async function approveJoin(requestId) {
+    try {
+        const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/approve`, { method: "PATCH" });
+        if (res.ok) {
+            alert("Request approved!");
+            loadJoinRequests();
+        } else {
+            alert("Failed to approve request.");
+        }
+    } catch {
+        alert("Unable to process request.");
+    }
+}
+async function denyJoin(requestId) {
+    try {
+        const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/deny`, { method: "PATCH" });
+        if (res.ok) {
+            alert("Request denied.");
+            loadJoinRequests();
+        } else {
+            alert("Failed to deny request.");
+        }
+    } catch {
+        alert("Unable to process request.");
+    }
+}
+
+// Auto-load when sections are opened
+document.querySelector("a[href*='teams']").addEventListener("click", loadTeams);
+document.querySelector("a[href*='admin']").addEventListener("click", () => {
+    loadPendingProblems();
+    loadJoinRequests();
+});
+
+
+// Initialize
+window.addEventListener("DOMContentLoaded", loadChallenges);
+</script>
+</body>
+</html>
