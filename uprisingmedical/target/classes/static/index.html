@@ -177,19 +177,26 @@
 </section>
 
 <section id="signup" class="content-section">
-    <h2 style="text-align:center;">Sign Up</h2>
-    <form id="signupForm">
-        <input type="text" id="signupUsername" placeholder="Username" required>
-        <input type="password" id="signupPassword" placeholder="Password" required>
-        <select id="signupRole" required>
-            <option value="">Select Role</option>
-            <option value="STUDENT">Student</option>
-            <option value="ADMIN">Admin</option>
-        </select>
-        <button type="submit">Sign Up</button>
-    </form>
-    <p id="signupMessage" style="text-align:center; margin-top:1rem;"></p>
+  <h2 style="text-align:center;">Sign Up</h2>
+  <form id="signupForm">
+    <input type="text" id="signupUsername" placeholder="Username" required>
+    <input type="password" id="signupPassword" placeholder="Password" required>
+
+    <select id="signupRole" required>
+      <option value="">Select Role</option>
+      <option value="STUDENT">Student</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+
+    <!-- Shown only when role = ADMIN -->
+    <input type="password" id="signupAdminCode"
+           placeholder="Admin Code"
+           style="display:none;">
+    <button type="submit">Sign Up</button>
+  </form>
+  <p id="signupMessage" style="text-align:center; margin-top:1rem;"></p>
 </section>
+
 
 <section id="teams" class="content-section">
     <h2 style="text-align:center;">Available Teams</h2>
@@ -213,36 +220,53 @@
 <script>
 // Navigation
 function showSection(sectionId) {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function toggleMenu() {
-    const navLinks = document.querySelector('.nav-links');
-    navLinks.style.display = (navLinks.style.display === 'flex') ? 'none' : 'flex';
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(sectionId)?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (sectionId === 'challenges') loadChallenges();
+  if (sectionId === 'teams') loadTeams();
+  if (sectionId === 'admin') { loadPendingProblems(); loadJoinRequests(); }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  loadChallenges(); // warm cache
+});
+
+
+
 // Submit Problem
-document.getElementById("problemForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    const data = {
-        title: document.getElementById("title").value,
-        description: document.getElementById("description").value,
-        category: document.getElementById("category").value
-    };
-    try {
-        const response = await fetch("http://localhost:8080/problems", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(data)
-        });
-        document.getElementById("formMessage").textContent = response.ok
-            ? "Problem submitted! Awaiting admin approval."
-            : "Error submitting problem.";
-        if (response.ok) this.reset();
-    } catch {
-        document.getElementById("formMessage").textContent = "Unable to connect to server.";
-    }
+// Submit Problem
+document.getElementById("problemForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = e.submitter || e.target.querySelector("button[type=submit]");
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const category = document.getElementById("category").value;
+  const msg = document.getElementById("formMessage");
+
+  if (!title || !description || !category) { msg.textContent = "Please fill all fields."; return; }
+
+  btn.disabled = true; btn.textContent = "Submitting…"; msg.textContent = "";
+
+  try {
+    const res = await fetch("http://localhost:8080/problems", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, description, category })
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    msg.textContent = "Submitted! Awaiting admin approval.";
+    e.target.reset();
+    // optional refresh
+    typeof loadPendingProblems === "function" && loadPendingProblems();
+    typeof loadChallenges === "function" && loadChallenges();
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Submission failed. See console.";
+  } finally {
+    btn.disabled = false; btn.textContent = "Submit Problem";
+  }
 });
 
 // Load Challenges
@@ -307,22 +331,31 @@ async function approveProblem(id) {
 }
 
 // Sign Up
-document.getElementById("signupForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    const res = await fetch("http://localhost:8080/auth/register", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            username: document.getElementById("signupUsername").value,
-            password: document.getElementById("signupPassword").value,
-            role: document.getElementById("signupRole").value
-        })
-    });
-    document.getElementById("signupMessage").textContent = res.ok
-        ? "Account created successfully!"
-        : "Error creating account.";
-    if (res.ok) this.reset();
+// Show/hide Admin Code based on role
+document.getElementById("signupRole").addEventListener("change", (e) => {
+  const adminCodeInput = document.getElementById("signupAdminCode");
+  adminCodeInput.style.display = e.target.value === "ADMIN" ? "block" : "none";
+  if (e.target.value !== "ADMIN") adminCodeInput.value = "";
 });
+
+// Submit handler
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = {
+    username: signupUsername.value.trim(),
+    password: signupPassword.value,
+    role: signupRole.value,
+    adminCode: signupRole.value === "ADMIN" ? signupAdminCode.value : null
+  };
+  const res = await fetch("/auth/register", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  const text = await res.text();
+  signupMessage.textContent = res.ok ? text : text || "Error creating account.";
+  // do NOT auto-login unless you want to
+});
+
 
 // Login
 document.getElementById("loginForm").addEventListener("submit", async function(e) {
@@ -337,10 +370,14 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         });
         const text = await res.text();
         if (res.ok) {
-            document.getElementById("loginMessage").textContent = text;
+              document.getElementById("loginMessage").textContent = text;
+            // ✅ persist who is logged in so requests know the username
+            localStorage.setItem("username", username);
+            localStorage.setItem("role", text.includes("ADMIN") ? "ADMIN" : "STUDENT");
             if (text.includes("ADMIN")) {
                 document.getElementById("adminNav").style.display = "inline-block";
-            }
+        }
+            
         } else {
             document.getElementById("loginMessage").textContent = "Invalid username or password.";
         }
@@ -377,110 +414,194 @@ document.getElementById("createTeamForm").addEventListener("submit", async funct
 
 // Load Teams (for Teams Page)
 async function loadTeams() {
-    const container = document.getElementById("teamsList");
-    container.innerHTML = "<p>Loading teams...</p>";
-    try {
-        const res = await fetch("http://localhost:8080/teams");
-        const teams = await res.json();
-        container.innerHTML = teams.length === 0
-            ? "<p>No teams yet.</p>"
-            : teams.map(team => `
-                <div style="background:#1b2b47; padding:1rem; border-radius:8px; border:1px solid #33415c;">
-                    <h3 style="color:#4a90e2;">${team.name}</h3>
-                    <p>${team.description || "No description provided."}</p>
-                    <button onclick="requestToJoin(${team.id})" style="margin-top:0.5rem; background:#4a90e2; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">Request to Join</button>
-                </div>
-            `).join("");
-    } catch {
-        container.innerHTML = "<p style='color:red;'>Error loading teams.</p>";
-    }
-}
+  const container = document.getElementById("teamsList");
+  if (!container) return;
 
-// User Requests to Join Team
-async function requestToJoin(teamId) {
-    const username = document.getElementById("loginUsername").value || localStorage.getItem("username");
-    if (!username) {
-        alert("Please log in before sending a join request.");
-        return;
+  container.innerHTML = "<p>Loading teams...</p>";
+
+  try {
+    const res = await fetch("http://localhost:8080/teams");
+    const teams = await res.json();
+
+    if (!Array.isArray(teams) || teams.length === 0) {
+      container.innerHTML = "<p>No teams yet.</p>";
+      return;
     }
 
-    try {
+    const getId = (t) => Number.isFinite(t?.id) ? t.id : null;
+
+    container.innerHTML = teams.map(t => {
+      const id = getId(t);
+      return `
+        <div class="team-card" style="background:#1b2b47; padding:1rem; border-radius:8px; border:1px solid #33415c;">
+          <h3 style="color:#4a90e2;">${t.name ?? ''}</h3>
+          <p>${t.description ?? "No description provided."}</p>
+          <button class="join-btn" ${id == null ? "disabled" : ""} data-team-id="${id ?? ''}"
+                  style="margin-top:0.5rem; background:#4a90e2; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">
+            Request to Join
+          </button>
+          <div class="members" id="members-${id}" style="margin-top:0.75rem; font-size:0.95rem;">
+            <em>${id == null ? "No id available" : "Loading members..."}</em>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // Fetch approved members for each team
+    for (const t of teams) {
+      const id = getId(t);
+      if (id == null) continue;
+      const box = document.getElementById(`members-${id}`);
+      if (!box) continue;
+      try {
+        const mRes = await fetch(`http://localhost:8080/teams/${id}/members`);
+        if (!mRes.ok) { box.innerHTML = "<em>No approved members yet.</em>"; continue; }
+        const members = await mRes.json();
+        box.innerHTML = (Array.isArray(members) && members.length)
+          ? `<strong>Members:</strong> ${members.join(", ")}`
+          : `<em>No approved members yet.</em>`;
+      } catch {
+        box.innerHTML = "<span style='color:#d9534f;'>Failed to load members.</span>";
+      }
+    }
+  } catch {
+    container.innerHTML = "<p style='color:red;'>Error loading teams.</p>";
+  }
+
+  // Attach once
+  if (!container.dataset.joinHandlerBound) {
+    container.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".join-btn");
+      if (!btn || btn.disabled) return;
+
+      const teamId = Number(btn.dataset.teamId);
+      const username = localStorage.getItem("username")
+        || document.getElementById("loginUsername")?.value;
+
+      if (!Number.isFinite(teamId)) return alert("Invalid team id.");
+      if (!username) return alert("Please log in before sending a join request.");
+
+      btn.disabled = true; btn.textContent = "Sending...";
+      try {
         const res = await fetch(`http://localhost:8080/teams/${teamId}/request`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username })
         });
-        alert(res.ok ? "Request sent to admin!" : "Failed to send join request.");
-    } catch {
-        alert("Unable to send join request.");
-    }
+        if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        btn.textContent = "Request Sent";
+      } catch (err) {
+        console.error(err);
+        alert("Join failed. See console for details.");
+        btn.disabled = false; btn.textContent = "Request to Join";
+      }
+    });
+    container.dataset.joinHandlerBound = "true";
+  }
 }
 
-
-// Load Pending Join Requests (Admin Page)
 async function loadJoinRequests() {
-    const container = document.getElementById("joinRequests");
-    container.innerHTML = "<p>Loading requests...</p>";
-    try {
-        const res = await fetch("http://localhost:8080/teams/pending");
-        const requests = await res.json();
-        container.innerHTML = requests.length === 0
-            ? "<p>No pending requests.</p>"
-            : "";
-        requests.forEach(req => {
-            const card = document.createElement("div");
-            card.style = "padding:1rem; background:#1b2b47; border-radius:8px; border:1px solid #33415c;";
-            card.innerHTML = `
-                <p><strong>User:</strong> ${req.username}</p>
-                <p><strong>Team:</strong> ${req.team?.name || "Unknown"}</p>
-                <button onclick="approveJoin(${req.id})" style="background:#4a90e2; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; margin-right:0.5rem;">Approve</button>
-                <button onclick="denyJoin(${req.id})" style="background:#d9534f; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">Deny</button>
-            `;
-            container.appendChild(card);
-        });
-    } catch {
-        container.innerHTML = "<p style='color:red;'>Error loading requests.</p>";
-    }
+  const box = document.getElementById("joinRequests");
+  if (!box) return;
+  box.innerHTML = "<p>Loading requests...</p>";
+
+  try {
+    const res = await fetch("http://localhost:8080/teams/requests/pending");
+    if (!res.ok) throw new Error(await res.text());
+    const reqs = await res.json();
+
+    box.innerHTML = reqs.length ? "" : "<p>No pending requests.</p>";
+    reqs.forEach(r => {
+      box.insertAdjacentHTML("beforeend", `
+        <div class="stat-card">
+          <p><strong>${r.username}</strong> → Team ${r.team?.id ?? "?"}</p>
+          <div style="margin-top:.5rem;">
+            <button onclick="approveJoin(${r.id})">Approve</button>
+            <button onclick="denyJoin(${r.id})" style="margin-left:.5rem;">Deny</button>
+          </div>
+        </div>
+      `);
+    });
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = "<p style='color:#d9534f;'>Failed to load requests.</p>";
+  }
 }
 
-// Approve/Deny Join Requests (Admin)
+
+function requestToJoin(teamId, btnEl) {
+  const id = Number(teamId);
+  if (!Number.isFinite(id)) { alert("Invalid team id."); return; }
+
+  const username = localStorage.getItem("username") || document.getElementById("loginUsername")?.value;
+  if (!username) { alert("Please log in before sending a join request."); return; }
+
+  const revert = () => { if (btnEl) { btnEl.disabled = false; btnEl.textContent = "Request to Join"; } };
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "Sending..."; }
+
+  fetch(`http://localhost:8080/teams/${id}/request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username })
+  })
+  .then(async res => {
+    if (res.ok) { if (btnEl) btnEl.textContent = "Request Sent"; }
+    else {
+      const msg = await res.text().catch(()=>"");
+      alert(`Failed: ${res.status} ${msg || ""}`);
+      revert();
+    }
+  })
+  .catch(err => { console.error(err); alert("Network error."); revert(); });
+}
+
+// ✨ expose to inline onclick
+window.requestToJoin = requestToJoin;
+
 async function approveJoin(requestId) {
-    try {
-        const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/approve`, { method: "PATCH" });
-        if (res.ok) {
-            alert("Request approved!");
-            loadJoinRequests();
-        } else {
-            alert("Failed to approve request.");
-        }
-    } catch {
-        alert("Unable to process request.");
+  try {
+    const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/approve`, { method: "PATCH" });
+    if (res.ok) {
+      alert("Request approved!");
+      loadJoinRequests();
+      loadTeams(); // 👈 refresh members list
+    } else {
+      alert("Failed to approve request.");
     }
+  } catch {
+    alert("Unable to process request.");
+  }
 }
+
 async function denyJoin(requestId) {
-    try {
-        const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/deny`, { method: "PATCH" });
-        if (res.ok) {
-            alert("Request denied.");
-            loadJoinRequests();
-        } else {
-            alert("Failed to deny request.");
-        }
-    } catch {
-        alert("Unable to process request.");
+  try {
+    const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/deny`, { method: "PATCH" });
+    if (res.ok) {
+      alert("Request denied.");
+      loadJoinRequests();
+      loadTeams(); // 👈 optional, in case you want to reflect any changes
+    } else {
+      alert("Failed to deny request.");
     }
+  } catch {
+    alert("Unable to process request.");
+  }
 }
 
-// Auto-load when sections are opened
-document.querySelector("a[href*='teams']").addEventListener("click", loadTeams);
-document.querySelector("a[href*='admin']").addEventListener("click", () => {
-    loadPendingProblems();
-    loadJoinRequests();
+document.addEventListener("DOMContentLoaded", () => {
+  // Preload challenges so Home has fresh data
+  loadChallenges?.();
+
+  // Attach listeners only if the elements exist
+  document.querySelector("a[href*='challenges']")?.addEventListener("click", loadChallenges);
+  document.querySelector("a[href*='teams']")?.addEventListener("click", loadTeams);
+  document.querySelector("a[href*='admin']")?.addEventListener("click", () => {
+    loadPendingProblems?.();
+    loadJoinRequests?.();
+  });
 });
-
-
-// Initialize
-window.addEventListener("DOMContentLoaded", loadChallenges);
 </script>
+
 </body>
 </html>
+ 
