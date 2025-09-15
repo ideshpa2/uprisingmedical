@@ -1,45 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uprising Medical - Connecting Engineers to Medical Innovation</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: #0a1a2f; color: #e0e6f0; overflow-x: hidden; }
-        nav { background: rgba(15, 25, 40, 0.95); position: sticky; top: 0; z-index: 1000; padding: 1rem 0; }
-        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
-        .logo { font-size: 1.5rem; font-weight: bold; background: linear-gradient(45deg, #667eea, #764ba2);
-                -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
-        .nav-links { display: flex; list-style: none; gap: 1.5rem; }
-        .nav-links a { text-decoration: none; color: #e0e6f0; padding: 0.5rem 1rem; border-radius: 6px; transition: background 0.3s ease; }
-        .nav-links a:hover { background: rgba(102, 126, 234, 0.2); }
-        .mobile-menu { display: none; flex-direction: column; cursor: pointer; }
-        .mobile-menu span { width: 25px; height: 3px; background: #e0e6f0; margin: 4px 0; }
-        .content-section { display: none; padding: 3rem 1rem; }
-        .content-section.active { display: block; }
-        .hero { height: 90vh; display: flex; align-items: center; justify-content: center; text-align: center;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; margin: 2rem auto;
-                max-width: 1000px; padding: 2rem; }
-        .hero h1 { font-size: 3rem; color: #fff; margin-bottom: 1rem; }
-        .hero p { font-size: 1.3rem; color: #e0e6f0; }
-        .stat-card, .about-card, .team-member { background: #1b2b47; border: 1px solid #33415c; border-radius: 12px;
-                padding: 1.5rem; margin: 1rem 0; }
-        #problemForm input, #problemForm textarea, #problemForm select, #signupForm input, #signupForm select, #loginForm input {
-            padding: 0.7rem; border-radius: 6px; border: 1px solid #33415c; background: #1b2b47; color: #e0e6f0; font-size: 1rem;
-        }
-        button { background: #4a90e2; border: none; color: white; padding: 0.75rem; border-radius: 6px; cursor: pointer; }
-        button:hover { background: #3578d4; }
-        footer { background: #081526; color: #cdd6e5; text-align: center; padding: 2rem 0; margin-top: 3rem; }
-        @media (max-width: 768px) {
-            .nav-links { display: none; flex-direction: column; background: #0a1a2f; width: 100%; position: absolute; top: 60px; left: 0; padding: 1rem; }
-            .mobile-menu { display: flex; }
-        }
-    </style>
-    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Uprising Medical - Connecting Engineers to Medical Innovation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Single, light theme (remove ALL other <style> blocks) -->
+  <style>
+    :root{
+      --bg:#ffffff; --text:#2c3e50; --muted:#666;
+      --primary:#667eea; --secondary:#764ba2; --ring:rgba(102,126,234,.35);
+      --card:#ffffff; --border:#f0f0f0; --shadow:0 6px 16px rgba(0,0,0,.08);
+      --btn:#4a90e2; --btn-hover:#3578d4;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+
+    /* Nav */
+    nav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.95);
+        backdrop-filter:blur(10px);box-shadow:0 1px 10px rgba(0,0,0,.08);padding:.75rem 0}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 2rem}
+    .logo{font-weight:700;font-size:1.25rem;background:linear-gradient(45deg,var(--primary),var(--secondary));
+          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .nav-links{list-style:none;display:flex;gap:1rem}
+    .nav-links a{color:var(--text);text-decoration:none;font-weight:500;padding:.4rem .8rem;border-radius:20px;transition:.2s}
+    .nav-links a:hover,.nav-links a.active{background:rgba(102,126,234,.1)}
+
+    /* Sections & cards */
+    .content-section{display:none;padding:2.25rem 1rem}
+    .content-section.active{display:block}
+    .container{max-width:1100px;margin:0 auto}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:1.25rem}
+
+    /* Hero */
+    .hero{margin-top:60px;background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
+          color:#fff;text-align:center;padding:3rem 2rem 2rem;border-radius:12px}
+    .hero h1{font-size:2.4rem;margin:.2rem 0 .6rem}
+    .hero p{opacity:.95;max-width:700px;margin:0 auto}
+
+    /* Forms & controls */
+    input,textarea,select,button{font-size:1rem}
+    input,textarea,select{
+      width:100%;padding:.7rem .8rem;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);
+      outline:none;transition:border-color .15s, box-shadow .15s
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 .2rem var(--ring)}
+    button{background:var(--btn);color:#fff;border:none;border-radius:10px;padding:.7rem 1rem;cursor:pointer;font-weight:600;transition:.15s}
+    button:hover{background:var(--btn-hover)}
+    .muted{color:var(--muted)}
+    .list{display:flex;flex-direction:column;gap:1rem}
+    .item{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:1rem}
+
+    /* Chips */
+    .chip{display:inline-block;background:rgba(102,126,234,.1);color:var(--primary);border:1px solid rgba(102,126,234,.2);
+          padding:.25rem .5rem;border-radius:999px;font-size:.85rem}
+
+    /* Footer */
+    footer{background:#f8fafc;border-top:1px solid var(--border);color:var(--muted);text-align:center;padding:2rem 0;margin-top:2rem}
+
+    /* Team grid + modal (from your About file, adapted to light theme) */
+    .um-team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+    .um-team-card{cursor:pointer;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:1rem;transition:transform .12s}
+    .um-team-card:hover{transform:translateY(-2px)}
+    .um-photo{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(102,126,234,.1);color:var(--primary);font-weight:700;margin-bottom:.5rem}
+    .um-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000}
+    .um-modal-content{background:#fff;border-radius:14px;box-shadow:var(--shadow);max-width:520px;margin:10vh auto;padding:1.25rem}
+    .um-close{float:right;font-size:1.5rem;cursor:pointer}
+
+    /* === ABOUT PAGE THEME EXTRAS === */
+    .about-hero{
+    margin-top:60px; position:relative; color:#fff; text-align:center;
+    padding:3rem 2rem 2rem; border-radius:12px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    }
+    .about-hero::before{
+    content:""; position:absolute; inset:0;
+    background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0 L0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23g)"/></svg>');
+    animation:gridMove 20s linear infinite;
+    border-radius:12px;
+    }
+    @keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(10px,10px)}}
+
+    .mission-vision{display:flex;justify-content:center;gap:1.25rem;margin:2rem 0 3rem}
+    .info-card{
+    background:#fff;padding:2rem;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.08);
+    border:1px solid #f0f0f0;transition:.3s;text-align:center;height:280px;display:flex;flex-direction:column;justify-content:center
+    }
+    .info-card:hover{transform:translateY(-5px);box-shadow:0 15px 30px rgba(102,126,234,.15)}
+    .info-card h2{color:#667eea;font-size:1.8rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:10px}
+    .info-card i{color:#764ba2;font-size:1.5rem}
+    .info-card p{color:#666;line-height:1.6;flex-grow:1;display:flex;align-items:center}
+
+    /* Team */
+    .team-section h2{
+    font-size:2.5rem;text-align:center;margin:3rem 0 2rem;
+    background:linear-gradient(45deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+    }
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:1200px;margin:0 auto}
+    .team-card{
+    background:#fff;padding:2rem 1.5rem;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.08);
+    border:1px solid #f0f0f0;transition:.3s;text-align:center;cursor:pointer;height:380px;width:280px;display:flex;flex-direction:column;justify-content:space-between;margin:0 auto
+    }
+    .team-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(102,126,234,.15)}
+    .profile-photo{
+    width:120px;height:120px;border-radius:50%;
+    background:linear-gradient(45deg,#667eea,#764ba2);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:700;box-shadow:0 5px 15px rgba(102,126,234,.3);transition:.3s;flex-shrink:0
+    }
+    .team-card:hover .profile-photo{transform:scale(1.05)}
+    .team-card h3{color:#2c3e50;font-size:1.1rem;margin:.5rem 0 .25rem;font-weight:600}
+    .team-card .role{color:#667eea;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem}
+    .team-card p{color:#666;font-size:.85rem;line-height:1.4}
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(5px)}
+    .modal-content{
+    background:#fff;margin:5% auto;padding:3rem;border-radius:20px;width:90%;max-width:600px;position:relative;text-align:center;animation:modalSlideIn .3s ease-out
+    }
+    @keyframes modalSlideIn{from{opacity:0;transform:translateY(-50px)}to{opacity:1;transform:translateY(0)}}
+    .close{position:absolute;right:1.5rem;top:1.5rem;font-size:2rem;color:#aaa;cursor:pointer}
+    .close:hover{color:#667eea}
+
+  </style>
 </head>
+
 <body>
 <nav>
     <div class="nav-container">
@@ -61,118 +147,145 @@
 </nav>
 
 <section id="home" class="content-section active">
+  <div class="container">
     <div class="hero">
-        <div>
-            <h1>Uprising Medical</h1>
-            <p>Connecting Engineers to Solve Real-World Medical Challenges</p>
-            <button onclick="showSection('submit')">Submit a Problem</button>
-        </div>
+      <h1>Uprising Medical</h1>
+      <p>Revolutionizing healthcare through innovation, compassion, and cutting-edge solutions.</p>
+      <div style="margin-top:1rem">
+        <button onclick="showSection('submit')">Submit a Problem</button>
+        <button onclick="showSection('challenges')" style="margin-left:.5rem">View Challenges</button>
+      </div>
     </div>
+  </div>
 </section>
 
 <section id="about" class="content-section">
-    <div class="about-card">
-        <h2>Our Mission</h2>
-        <p>We connect medical professionals with engineering students to solve healthcare challenges.</p>
+  <div class="container">
+    <!-- Hero -->
+    <div class="about-hero card">
+      <h1 style="margin:.2rem 0 .6rem">About Uprising Medical</h1>
+      <p style="opacity:.95;max-width:700px;margin:0 auto">
+        We connect medical professionals with engineering students to co-create real, deployable healthcare solutions.
+      </p>
     </div>
+
+    <!-- Mission & Vision -->
+    <div class="mission-vision">
+      <div class="info-card" style="max-width:520px">
+        <h2><i class="fa-solid fa-heart-pulse"></i> Our Mission</h2>
+        <p>Accelerate patient impact by pairing clinical problems with maker-minds and rapid prototyping.</p>
+      </div>
+      <div class="info-card" style="max-width:520px">
+        <h2><i class="fa-solid fa-lightbulb"></i> Our Vision</h2>
+        <p>Open, ethical, affordable innovation—from student labs to bedside.</p>
+      </div>
+    </div>
+
+    <!-- Team -->
+    <section class="team-section">
+      <h2>Meet Our Team</h2>
+      <div class="team-grid">
+        <!-- Founders -->
+        <div class="team-card" onclick="openAboutProfile('founder1')">
+          <div class="profile-photo">DC</div>
+          <div class="team-content">
+            <h3>Dhruvrajsinh Chauhan</h3>
+            <div class="role">Founder</div>
+            <p>Biomedical innovator building partnerships to deliver real healthcare impact.</p>
+          </div>
+        </div>
+        <div class="team-card" onclick="openAboutProfile('cofounder1')">
+          <div class="profile-photo">LM</div>
+          <div class="team-content">
+            <h3>Leul Mesfin</h3>
+            <div class="role">Co-Founder</div>
+            <p>Software/medical systems architect driving the platform’s technical vision.</p>
+          </div>
+        </div>
+
+        <!-- Directors (examples) -->
+        <div class="team-card" onclick="openAboutProfile('tech-director')">
+          <div class="profile-photo">ID</div>
+          <div class="team-content">
+            <h3>Ishita Deshpande</h3>
+            <div class="role">Technical Director</div>
+            <p>Leads HIPAA-aware medical software and integrations.</p>
+          </div>
+        </div>
+        <div class="team-card" onclick="openAboutProfile('social-director')">
+          <div class="profile-photo">TP</div>
+          <div class="team-content">
+            <h3>Tristan Puskarov</h3>
+            <div class="role">Social Media Director</div>
+            <p>Drives outreach and patient education content.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile Modal -->
+    <div id="aboutProfileModal" class="modal" aria-modal="true" role="dialog">
+      <div class="modal-content">
+        <span class="close" onclick="closeAboutProfile()">&times;</span>
+        <div id="aboutModalContent"></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section id="submit" class="content-section">
-    <h2 style="text-align:center; color:#4a90e2; margin-bottom:1rem;">Submit a Problem</h2>
-    <form id="problemForm" style="
-        max-width: 500px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        background: #1b2b47;
-        padding: 2rem;
-        border-radius: 12px;
-        border: 1px solid #33415c;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-    ">
-        <input type="text" id="title" placeholder="Problem Title" required style="
-            padding:0.7rem;
-            border-radius:6px;
-            border:1px solid #33415c;
-            background:#101c36;
-            color:#e0e6f0;
-            font-size:1rem;
-        ">
-        <textarea id="description" placeholder="Describe the problem..." rows="5" required style="
-            padding:0.7rem;
-            border-radius:6px;
-            border:1px solid #33415c;
-            background:#101c36;
-            color:#e0e6f0;
-            font-size:1rem;
-        "></textarea>
-        <select id="category" required style="
-            padding:0.7rem;
-            border-radius:6px;
-            border:1px solid #33415c;
-            background:#101c36;
-            color:#e0e6f0;
-            font-size:1rem;
-        ">
-            <option value="">Select a category</option>
-            <option value="Diagnostics">Diagnostics</option>
-            <option value="Prosthetics">Prosthetics</option>
-            <option value="Software">Software</option>
-            <option value="Medical Device">Medical Device</option>
-        </select>
-        <button type="submit" style="
-            background: linear-gradient(45deg, #4a90e2, #6a5acd);
-            color:white;
-            padding:0.8rem;
-            border:none;
-            border-radius:6px;
-            cursor:pointer;
-            font-size:1rem;
-            transition:all 0.3s ease;
-        " onmouseover="this.style.transform='translateY(-2px)'" 
-           onmouseout="this.style.transform='translateY(0)'">
-            Submit Problem
-        </button>
+  <div class="container">
+    <h2 class="logo" style="font-size:1.75rem;margin-bottom:1rem;text-align:center">Submit a Problem</h2>
+    <form id="problemForm" class="card" style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:1rem">
+      <input id="title" type="text" placeholder="Problem Title" required/>
+      <textarea id="description" rows="5" placeholder="Describe the problem..." required></textarea>
+      <select id="category" required>
+        <option value="">Select a category</option>
+        <option value="Diagnostics">Diagnostics</option>
+        <option value="Prosthetics">Prosthetics</option>
+        <option value="Software">Software</option>
+        <option value="Medical Device">Medical Device</option>
+      </select>
+      <button type="submit">Submit Problem</button>
     </form>
-    <p id="formMessage" style="text-align:center; margin-top:1rem; color:#cdd6e5;"></p>
+    <p id="formMessage" class="muted" style="text-align:center;margin-top:1rem"></p>
+  </div>
 </section>
 
 <section id="challenges" class="content-section">
-    <h2 style="text-align:center;">Open Challenges</h2>
-    <div id="challengesList"></div>
+  <div class="container">
+    <h2 class="logo" style="font-size:1.75rem;margin-bottom:1rem">Open Challenges</h2>
+    <div id="challengesList" class="list"></div>
+  </div>
 </section>
 
 <!-- Admin Page -->
 <section id="admin" class="content-section">
     <h2 style="text-align:center;">Admin Panel</h2>
 
-    <!-- Create Team -->
-    <div style="max-width:500px; margin:2rem auto; background:#1b2b47; padding:1.5rem; border-radius:12px; border:1px solid #33415c;">
-        <h3 style="color:#4a90e2;">Create a New Team</h3>
-        <form id="createTeamForm" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
-            <input type="text" id="teamNameCreate" placeholder="Team Name" required>
-            <textarea id="teamDescCreate" placeholder="Describe your team..." rows="3"></textarea>
-            <button type="submit" style="background:#4a90e2; color:white; padding:0.7rem; border:none; border-radius:6px;">Create Team</button>
-        </form>
-        <p id="createTeamMessage" style="text-align:center; margin-top:1rem;"></p>
-    </div>
+<!-- Create Team -->
+<div class="card" style="max-width:600px;margin:2rem auto;">
+  <h3 style="color:#4a90e2;margin-top:0">Create a New Team</h3>
+  <form id="createTeamForm" style="display:flex;flex-direction:column;gap:1rem;margin-top:1rem;">
+    <input type="text" id="teamNameCreate" placeholder="Team Name" required>
+    <textarea id="teamDescCreate" placeholder="Describe your team..." rows="3"></textarea>
+    <button type="submit">Create Team</button>
+  </form>
+  <p id="createTeamMessage" class="muted" style="text-align:center;margin-top:1rem;"></p>
+</div>
 
-    <!-- Pending Join Requests -->
-    <div style="max-width:700px; margin:2rem auto;">
-        <h3 style="color:#4a90e2;">Pending Join Requests</h3>
-        <div id="joinRequests" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
-            <!-- Requests will be loaded dynamically -->
-        </div>
-    </div>
+<!-- Pending Join Requests -->
+<div class="card" style="max-width:800px;margin:2rem auto;">
+  <h3 style="color:#4a90e2;margin-top:0">Pending Join Requests</h3>
+  <div id="joinRequests" class="list" style="margin-top:1rem;"></div>
+</div>
 
-    <!-- Pending Problem Approvals -->
-    <div style="max-width:700px; margin:2rem auto;">
-        <h3 style="color:#4a90e2;">Pending Problem Approvals</h3>
-        <div id="pendingProblems" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
-            <!-- Problems will be loaded dynamically -->
-        </div>
-    </div>
+<!-- Pending Problem Approvals -->
+<div class="card" style="max-width:800px;margin:2rem auto;">
+  <h3 style="color:#4a90e2;margin-top:0">Pending Problem Approvals</h3>
+  <div id="pendingProblems" class="list" style="margin-top:1rem;"></div>
+</div>
+
 
 </section>
 
@@ -215,6 +328,45 @@
     <p id="loginMessage" style="text-align:center; margin-top:1rem;"></p>
 </section>
 
+<script>
+  // Profile data (trimmed; extend as desired)
+  const UM_PROFILES = {
+    founder1: {
+      photo:'DC', name:'Dhruvrajsinh Chauhan', role:'Founder',
+      bio:`Visionary founder bridging engineering and clinical needs to improve outcomes.`
+    },
+    cofounder1: {
+      photo:'LM', name:'Leul Mesfin', role:'Co-Founder',
+      bio:`Software engineer and medical systems architect driving technical roadmap.`
+    },
+    'tech-director': {
+      photo:'ID', name:'Ishita Deshpande', role:'Technical Director',
+      bio:`Leads HIPAA-compliant platform engineering and integrations.`
+    },
+    'social-director': {
+      photo:'TP', name:'Tristan Puskarov', role:'Social Media Director',
+      bio:`Builds outreach and patient education programs.`
+    }
+  };
+
+  function openProfile(id){
+    const p = UM_PROFILES[id]; if(!p) return;
+    const m = document.getElementById('profileModal');
+    const body = document.getElementById('modalBody');
+    body.innerHTML = `
+      <div class="um-photo" style="width:140px;height:140px;font-size:2rem;margin-bottom:1rem">${p.photo}</div>
+      <h3 style="margin:.25rem 0 0">${p.name}</h3>
+      <div class="role" style="color:#667eea;margin:.25rem 0 1rem;font-weight:600">${p.role}</div>
+      <p style="color:#555;line-height:1.6">${p.bio}</p>`;
+    m.style.display = 'block';
+  }
+  function closeProfile(){ document.getElementById('profileModal').style.display='none'; }
+  window.addEventListener('click', (e)=> {
+    const m=document.getElementById('profileModal'); if(e.target===m) closeProfile();
+  });
+</script>
+
+
 <footer><p>&copy; 2025 Uprising Medical</p></footer>
 
 <script>
@@ -222,16 +374,25 @@
 function showSection(sectionId) {
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
   document.getElementById(sectionId)?.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  // highlight active nav link
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const link = [...document.querySelectorAll('.nav-links a')]
+    .find(a => a.getAttribute('onclick')?.includes(sectionId));
+  if (link) link.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   if (sectionId === 'challenges') loadChallenges();
   if (sectionId === 'teams') loadTeams();
   if (sectionId === 'admin') { loadPendingProblems(); loadJoinRequests(); }
 }
 
+// default view
 document.addEventListener('DOMContentLoaded', () => {
+  showSection('home');
   loadChallenges(); // warm cache
 });
+
 
 
 
@@ -277,17 +438,24 @@ async function loadChallenges() {
         const res = await fetch("http://localhost:8080/problems");
         const problems = await res.json();
         container.innerHTML = problems.length === 0
-            ? "<p>No approved challenges yet.</p>"
-            : problems.map(p => `
-                <div style="background:#1b2b47; padding:1rem; border-radius:8px; border:1px solid #33415c;">
-                    <h3 style="color:#4a90e2;">${p.title}</h3>
-                    <p>${p.description}</p>
-                    <small style="color:#cdd6e5;">Category: ${p.category}</small>
-                </div>`).join("");
+  ? "<p class='muted'>No approved challenges yet.</p>"
+  : problems.map(p => `
+      <div class="item">
+        <h3 style="margin:0 0 .25rem 0">${p.title}</h3>
+        <p class="muted" style="margin:.25rem 0 .5rem 0">${p.description}</p>
+        <span class="chip">Category: ${p.category}</span>
+      </div>`).join("");
+
     } catch {
         container.innerHTML = "<p style='color:red;'>Error loading challenges.</p>";
     }
 }
+
+function toggleMenu(){
+  const links = document.querySelector('.nav-links');
+  links.style.display = (links.style.display === 'flex' ? '' : 'flex');
+}
+
 
 // Load Pending Problems
 async function loadPendingProblems() {
@@ -300,14 +468,14 @@ async function loadPendingProblems() {
             ? "<p>No pending problems.</p>"
             : "";
         problems.forEach(p => {
-            const card = document.createElement("div");
-            card.style = "padding:1rem; margin:1rem 0; border:1px solid #33415c; background:#1b2b47; border-radius:8px;";
-            card.innerHTML = `
-                <h3>${p.title}</h3>
-                <p><strong>Category:</strong> ${p.category}</p>
-                <p>${p.description}</p>
-                <button onclick="approveProblem(${p.id})">Approve</button>`;
-            container.appendChild(card);
+        const card = document.createElement("div");
+        card.className = "item";
+        card.innerHTML = `
+            <h3 style="margin:0 0 .25rem 0">${p.title}</h3>
+            <p class="muted" style="margin:.25rem 0"><strong>Category:</strong> ${p.category}</p>
+            <p class="muted" style="margin:.25rem 0">${p.description}</p>
+            <button onclick="approveProblem(${p.id})">Approve</button>`;
+        container.appendChild(card);
         });
     } catch {
         container.innerHTML = "<p style='color:red;'>Error loading pending problems.</p>";
@@ -433,18 +601,14 @@ async function loadTeams() {
     container.innerHTML = teams.map(t => {
       const id = getId(t);
       return `
-        <div class="team-card" style="background:#1b2b47; padding:1rem; border-radius:8px; border:1px solid #33415c;">
-          <h3 style="color:#4a90e2;">${t.name ?? ''}</h3>
-          <p>${t.description ?? "No description provided."}</p>
-          <button class="join-btn" ${id == null ? "disabled" : ""} data-team-id="${id ?? ''}"
-                  style="margin-top:0.5rem; background:#4a90e2; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">
-            Request to Join
-          </button>
-          <div class="members" id="members-${id}" style="margin-top:0.75rem; font-size:0.95rem;">
-            <em>${id == null ? "No id available" : "Loading members..."}</em>
-          </div>
-        </div>
-      `;
+  <div class="item">
+    <h3 style="margin:0 0 .25rem 0">${t.name ?? ''}</h3>
+    <p class="muted" style="margin:.25rem 0">${t.description ?? "No description provided."}</p>
+    <button class="join-btn" data-team-id="${id}" style="margin-top:.5rem">Request to Join</button>
+    <div class="members" id="members-${id}" class="muted" style="margin-top:.5rem">
+      <em>${id == null ? "No id available" : "Loading members..."}</em>
+    </div>
+  </div>`;
     }).join("");
 
     // Fetch approved members for each team
@@ -510,24 +674,24 @@ async function loadJoinRequests() {
     if (!res.ok) throw new Error(await res.text());
     const reqs = await res.json();
 
-    box.innerHTML = reqs.length ? "" : "<p>No pending requests.</p>";
+    box.innerHTML = reqs.length ? "" : "<p class='muted'>No pending requests.</p>";
     reqs.forEach(r => {
-      box.insertAdjacentHTML("beforeend", `
-        <div class="stat-card">
-          <p><strong>${r.username}</strong> → Team ${r.team?.id ?? "?"}</p>
-          <div style="margin-top:.5rem;">
+    box.insertAdjacentHTML("beforeend", `
+        <div class="item">
+        <p style="margin:.25rem 0"><strong>${r.username}</strong> → Team ${r.team?.id ?? "?"}</p>
+        <div style="margin-top:.5rem;">
             <button onclick="approveJoin(${r.id})">Approve</button>
             <button onclick="denyJoin(${r.id})" style="margin-left:.5rem;">Deny</button>
-          </div>
         </div>
-      `);
+        </div>
+    `);
     });
+
   } catch (e) {
     console.error(e);
     box.innerHTML = "<p style='color:#d9534f;'>Failed to load requests.</p>";
   }
 }
-
 
 function requestToJoin(teamId, btnEl) {
   const id = Number(teamId);
@@ -587,6 +751,34 @@ async function denyJoin(requestId) {
     alert("Unable to process request.");
   }
 }
+
+  // About page profiles (scoped so it doesn't collide with other modals)
+  const ABOUT_PROFILES = {
+    founder1: { photo:'DC', name:'Dhruvrajsinh Chauhan', role:'Founder',
+      bio:`Visionary founder bridging engineering and clinical needs to improve outcomes.` },
+    cofounder1: { photo:'LM', name:'Leul Mesfin', role:'Co-Founder',
+      bio:`Software engineer and medical systems architect driving technical roadmap.` },
+    'tech-director': { photo:'ID', name:'Ishita Deshpande', role:'Technical Director',
+      bio:`Leads HIPAA-compliant platform engineering and integrations.` },
+    'social-director': { photo:'TP', name:'Tristan Puskarov', role:'Social Media Director',
+      bio:`Builds outreach and patient education programs.` }
+  };
+
+  function openAboutProfile(id){
+    const p = ABOUT_PROFILES[id]; if(!p) return;
+    const modal = document.getElementById('aboutProfileModal');
+    const slot  = document.getElementById('aboutModalContent');
+    slot.innerHTML = `
+      <div class="profile-photo" style="width:140px;height:140px;font-size:2.2rem;margin-bottom:1rem">${p.photo}</div>
+      <h3 style="margin:.25rem 0 0">${p.name}</h3>
+      <div class="role" style="margin:.25rem 0 1rem">${p.role}</div>
+      <p style="color:#555;line-height:1.6">${p.bio}</p>`;
+    modal.style.display = 'block';
+  }
+  function closeAboutProfile(){ document.getElementById('aboutProfileModal').style.display='none'; }
+  window.addEventListener('click', (e)=> {
+    const m = document.getElementById('aboutProfileModal'); if(e.target===m) closeAboutProfile();
+  });
 
 document.addEventListener("DOMContentLoaded", () => {
   // Preload challenges so Home has fresh data
