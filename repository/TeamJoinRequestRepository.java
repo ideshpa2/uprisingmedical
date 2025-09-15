@@ -9,3 +9,7 @@ public interface TeamJoinRequestRepository extends JpaRepository<TeamJoinRequest
     List<TeamJoinRequest> findByApprovedFalse();
     List<TeamJoinRequest> findByTeamIdAndApprovedTrue(Long teamId); // 👈 add this
 }
+
+
+
+

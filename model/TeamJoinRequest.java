@@ -49,4 +49,9 @@ public class TeamJoinRequest {
     public void setApproved(boolean approved) {
         this.approved = approved;
     }
+
+    // src/main/java/com/example/demo/dto/JoinRequestDTO.java
+
+  
+
 }
