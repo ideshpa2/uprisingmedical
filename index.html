@@ -124,6 +124,24 @@
     .close:hover{color:#667eea}
 
   </style>
+
+  <style>
+  .team-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .team-card { display:flex; gap:.9rem; padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); cursor:pointer; }
+  .profile-photo { width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#374151; flex:0 0 72px; }
+  .profile-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .team-content h3 { margin:0 0 .25rem; }
+  .team-content .role { font-size:.9rem; color:#4b5563; margin-bottom:.35rem; }
+  /* Simple modal defaults (adjust if you already have styles) */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; padding:1rem; }
+  .modal.open { display:flex; }
+  .modal-content { background:#fff; max-width:720px; width:100%; border-radius:.75rem; padding:1rem 1.25rem; position:relative; }
+  .modal-content .close { position:absolute; right:.75rem; top:.5rem; font-size:1.5rem; cursor:pointer; }
+  .profile-header { display:flex; gap:1rem; align-items:center; margin-bottom:.75rem; }
+  .profile-header img { width:84px; height:84px; border-radius:50%; object-fit:cover; }
+  .profile-links a { margin-right:.75rem; }
+</style>
+
 </head>
 
 <body>
@@ -146,18 +164,104 @@
     </div>
 </nav>
 
-<section id="home" class="content-section active">
-  <div class="container">
-    <div class="hero">
-      <h1>Uprising Medical</h1>
-      <p>Revolutionizing healthcare through innovation, compassion, and cutting-edge solutions.</p>
-      <div style="margin-top:1rem">
-        <button onclick="showSection('submit')">Submit a Problem</button>
-        <button onclick="showSection('challenges')" style="margin-left:.5rem">View Challenges</button>
-      </div>
+<!-- Video Section -->
+<!-- Top CTA Banner -->
+<div id="topCta"
+     style="position:sticky; top:0; z-index:9999; background:linear-gradient(90deg,#0f172a,#1e293b);
+            color:#fff; padding:.75rem 1rem; border-bottom:1px solid rgba(255,255,255,.12);">
+  <div style="max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:1rem;">
+    <!-- Icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z"></path>
+    </svg>
+
+    <!-- Message -->
+    <div style="flex:1; font-size:.95rem;">
+      <strong>Watch our video</strong> to learn how Uprising Medical empowers healthcare innovation.
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex; gap:.5rem;">
+      <button id="watchBtn"
+        style="appearance:none; border:none; padding:.5rem .9rem; border-radius:.5rem; font-weight:600;
+               background:#22c55e; color:#0b1b12; cursor:pointer;">
+        Watch the video
+      </button>
+      <button id="toggleBtn"
+        style="appearance:none; border:1px solid rgba(255,255,255,.25); padding:.5rem .9rem; border-radius:.5rem;
+               background:transparent; color:#fff; font-weight:600; cursor:pointer;">
+        Pause
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Your existing video section -->
+<section id="home" class="content-section active" style="min-height:100vh">
+  <div class="container" style="position:relative; min-height:100vh; overflow:hidden;">
+    <video id="heroVideo" autoplay muted loop playsinline
+           style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;">
+      <source src="/media/hero.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,.35); z-index:1;"></div>
+
+    <!-- Optional on-video tiny control (can remove if you prefer just the top banner) -->
+    <div style="position:absolute; bottom:20px; right:20px; z-index:2;">
+      <button id="inlineToggle"
+        style="appearance:none; border:none; padding:.4rem .7rem; border-radius:.375rem; font-weight:600;
+               background:rgba(255,255,255,.85); color:#0f172a; cursor:pointer;">
+        Pause
+      </button>
     </div>
   </div>
 </section>
+
+<script>
+  const video = document.getElementById('heroVideo');
+  const watchBtn = document.getElementById('watchBtn');
+  const toggleBtn = document.getElementById('toggleBtn');
+  const inlineToggle = document.getElementById('inlineToggle');
+
+  function setButtonsPlayingState(isPlaying) {
+    const text = isPlaying ? 'Pause' : 'Play';
+    toggleBtn.textContent = text;
+    inlineToggle.textContent = text;
+  }
+
+  // Smooth scroll to video and play
+  watchBtn.addEventListener('click', async () => {
+    document.getElementById('home').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try { await video.play(); } catch (e) {}
+    setButtonsPlayingState(true);
+  });
+
+  // Toggle from banner
+  toggleBtn.addEventListener('click', async () => {
+    if (video.paused) {
+      try { await video.play(); } catch (e) {}
+      setButtonsPlayingState(true);
+    } else {
+      video.pause();
+      setButtonsPlayingState(false);
+    }
+  });
+
+  // Toggle from inline button
+  inlineToggle.addEventListener('click', () => {
+    if (video.paused) {
+      video.play();
+      setButtonsPlayingState(true);
+    } else {
+      video.pause();
+      setButtonsPlayingState(false);
+    }
+  });
+
+  // Keep label in sync if user uses native controls or autoplay fails
+  video.addEventListener('play', () => setButtonsPlayingState(true));
+  video.addEventListener('pause', () => setButtonsPlayingState(false));
+</script>
 
 <section id="about" class="content-section">
   <div class="container">
@@ -169,59 +273,224 @@
       </p>
     </div>
 
-    <!-- Mission & Vision -->
-    <div class="mission-vision">
-      <div class="info-card" style="max-width:520px">
-        <h2><i class="fa-solid fa-heart-pulse"></i> Our Mission</h2>
-        <p>Accelerate patient impact by pairing clinical problems with maker-minds and rapid prototyping.</p>
+    <!-- Team -->
+    <!-- ===== Team Section (drop-in) ===== -->
+<section class="team-section">
+  <h2>Meet Our Team</h2>
+
+  <!-- Our Story -->
+  <div class="team-intro card" style="padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); margin-bottom:1rem;">
+    <h3 style="margin:.25rem 0 .5rem;">Our Story</h3>
+    <p style="margin:0; line-height:1.6;">
+      Uprising Medical was founded on <strong>November 19, 2024</strong>, by <strong>Dhruvrajsinh Chauhan</strong> and later joined by <strong>Leul Mesfin</strong>, with the vision of bridging the gap between real-world healthcare challenges and innovative problem solvers. The platform enables doctors, professionals, and the public to submit medical challenges, which engineering students then collaborate on to develop creative and practical solutions. Our mission is to foster innovation, connect communities, and enhance healthcare accessibility through collaborative problem-solving. Guided by our vision of accelerating medical innovation, our dedicated volunteer team works entirely without compensation, driven by a shared commitment to improving lives through the intersection of engineering and healthcare.
+    </p>
+  </div>
+
+  <div class="team-grid">
+    <!-- Founder -->
+    <div class="team-card" onclick="openAboutProfile('founder1')">
+      <div class="profile-photo">
+        <img src="/media/team/dc.jpg" alt="Photo of Dhruvrajsinh Chauhan"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='DC';">
       </div>
-      <div class="info-card" style="max-width:520px">
-        <h2><i class="fa-solid fa-lightbulb"></i> Our Vision</h2>
-        <p>Open, ethical, affordable innovation—from student labs to bedside.</p>
+      <div class="team-content">
+        <h3>Dhruvrajsinh Chauhan</h3>
+        <div class="role">Founder</div>
+        <p>Founder and guiding force behind Uprising Medical.</p>
       </div>
     </div>
 
-    <!-- Team -->
-    <section class="team-section">
-      <h2>Meet Our Team</h2>
-      <div class="team-grid">
-        <!-- Founders -->
-        <div class="team-card" onclick="openAboutProfile('founder1')">
-          <div class="profile-photo">DC</div>
-          <div class="team-content">
-            <h3>Dhruvrajsinh Chauhan</h3>
-            <div class="role">Founder</div>
-            <p>Biomedical innovator building partnerships to deliver real healthcare impact.</p>
-          </div>
-        </div>
-        <div class="team-card" onclick="openAboutProfile('cofounder1')">
-          <div class="profile-photo">LM</div>
-          <div class="team-content">
-            <h3>Leul Mesfin</h3>
-            <div class="role">Co-Founder</div>
-            <p>Software/medical systems architect driving the platform’s technical vision.</p>
-          </div>
-        </div>
+    <!-- Co-Founder -->
+    <div class="team-card" onclick="openAboutProfile('cofounder1')">
+      <div class="profile-photo">
+        <img src="/media/team/lm.jpg" alt="Photo of Leul Mesfin"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='LM';">
+      </div>
+      <div class="team-content">
+        <h3>Leul Mesfin</h3>
+        <div class="role">Co-Founder</div>
+        <p>Biomedical Engineering (ASU), specializing in biomedical devices.</p>
+      </div>
+    </div>
 
-        <!-- Directors (examples) -->
-        <div class="team-card" onclick="openAboutProfile('tech-director')">
-          <div class="profile-photo">ID</div>
-          <div class="team-content">
-            <h3>Ishita Deshpande</h3>
-            <div class="role">Technical Director</div>
-            <p>Leads HIPAA-aware medical software and integrations.</p>
-          </div>
-        </div>
-        <div class="team-card" onclick="openAboutProfile('social-director')">
-          <div class="profile-photo">TP</div>
-          <div class="team-content">
-            <h3>Tristan Puskarov</h3>
-            <div class="role">Social Media Director</div>
-            <p>Drives outreach and patient education content.</p>
-          </div>
+    <!-- Technical Director -->
+    <div class="team-card" onclick="openAboutProfile('tech-director')">
+      <div class="profile-photo">
+        <img src="/media/team/id.jpg" alt="Photo of Ishita Deshpande"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='ID';">
+      </div>
+      <div class="team-content">
+        <h3>Ishita Deshpande</h3>
+        <div class="role">Technical Director</div>
+        <p>Leads UI and platform functionality; JavaScript/React focus.</p>
+      </div>
+    </div>
+
+    <!-- Social Media Director -->
+    <div class="team-card" onclick="openAboutProfile('social-director')">
+      <div class="profile-photo">
+        <img src="/media/team/tp.jpg" alt="Photo of Tristan Puskarov"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='TP';">
+      </div>
+      <div class="team-content">
+        <h3>Tristan Puskarov</h3>
+        <div class="role">Social Media Director</div>
+        <p>Creates engaging content to amplify mission and outreach.</p>
+      </div>
+    </div>
+
+    <!-- PR Director -->
+    <div class="team-card" onclick="openAboutProfile('pr-director')">
+      <div class="profile-photo">
+        <img src="/media/team/gn.jpg" alt="Photo of Gwendylin Nguyen"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='GN';">
+      </div>
+      <div class="team-content">
+        <h3>Gwendylin Nguyen</h3>
+        <div class="role">PR Director</div>
+        <p>Strengthens ties with clinicians and builds the ASU club.</p>
+      </div>
+    </div>
+
+    <!-- Operations Director -->
+    <div class="team-card" onclick="openAboutProfile('ops-director')">
+      <div class="profile-photo">
+        <img src="/media/team/sg.jpg" alt="Photo of Suprathik Gangone"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='SG';">
+      </div>
+      <div class="team-content">
+        <h3>Suprathik Gangone</h3>
+        <div class="role">Operations Director</div>
+        <p>Operations, leadership, and community impact initiatives.</p>
+      </div>
+    </div>
+
+    <!-- Technical Executive -->
+    <div class="team-card" onclick="openAboutProfile('tech-exec-rk')">
+      <div class="profile-photo">
+        <img src="/media/team/rk.jpg" alt="Photo of Rohan Kshatriya"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='RK';">
+      </div>
+      <div class="team-content">
+        <h3>Rohan Kshatriya</h3>
+        <div class="role">Technical Executive</div>
+        <p>Designs infrastructure, backend features, and data integrations.</p>
+      </div>
+    </div>
+
+    <!-- Technical Executive -->
+    <div class="team-card" onclick="openAboutProfile('tech-exec-sa')">
+      <div class="profile-photo">
+        <img src="/media/team/sa.jpg" alt="Photo of Sarthak Avaiya"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='SA';">
+      </div>
+      <div class="team-content">
+        <h3>Sarthak Avaiya</h3>
+        <div class="role">Technical Executive</div>
+        <p>Builds user-friendly solutions bringing impact to communities.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Minimal styles (use once, or remove if you already have these) -->
+<style>
+  .team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
+  .team-card { display:flex; gap:.9rem; padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); cursor:pointer; }
+  .profile-photo { width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#374151; flex:0 0 72px; }
+  .profile-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .team-content h3 { margin:0 0 .2rem; }
+  .team-content .role { font-size:.9rem; color:#4b5563; margin-bottom:.35rem; }
+</style>
+
+<script>
+  // Modal data & wiring (uses your existing #aboutProfileModal and #aboutModalContent)
+  const teamProfiles = {
+    'founder1': {
+      name: 'Dhruvrajsinh Chauhan',
+      role: 'Founder',
+      img: '/media/team/dc.jpg',
+      bio: 'Dhruvrajsinh Chauhan is the founder and guiding force behind Uprising Medical, leading all aspects of the initiative. With strengths in innovation, cross-functional collaboration, platform development, and stakeholder engagement, he drives the team and ensures the platform effectively addresses real-world healthcare challenges through engineering solutions.',
+      links: { linkedin: '#', email: '' }
+    },
+    'cofounder1': {
+      name: 'Leul Mesfin',
+      role: 'Co-Founder',
+      img: '/media/team/lm.jpg',
+      bio: 'Leul Mesfin is the co-founder of Uprising Medical and is majoring in Biomedical Engineering at ASU specializing in biomedical devices. With experience in managing budgets, refining designs with CAD software, and collaborating across disciplines, his goal is the same: to turn ideas into tangible devices that improve lives. With a foundation in project leadership and product development, he is driven to contribute to the next generation of healthcare innovations.',
+       
+    },
+    'tech-director': {
+      name: 'Ishita Deshpande',
+      role: 'Technical Director',
+      img: '/media/team/id.jpg',
+      bio: 'Ishita Deshpande is a Computer Science major at ASU, specializing in JavaScript, React, and web design. At Uprising Medical, she leads the development of the website’s UI and functionality, connecting users and teams. Passionate about technology, she builds solutions that make engineering collaboration more accessible and impactful.',
+       
+    },
+    'social-director': {
+      name: 'Tristan Puskarov',
+      role: 'Social Media Director',
+      img: '/media/team/tp.jpg',
+      bio: 'Tristan is a sophomore Aerospace Engineering student at ASU and serves as the Social Media Director for Uprising Medical. He manages the organization’s social media presence, creating engaging and informative posts that share its mission and goals, helping people from all over connect with and contribute to the platform’s initiatives.',
+      
+    },
+    'pr-director': {
+      name: 'Gwendylin Nguyen',
+      role: 'PR Director',
+      img: '/media/team/gn.jpg',
+      bio: 'Gwendylin Nguyen is a sophomore double majoring in Biomedical Engineering and Management and serves as the PR Director of Uprising Medical. Passionate about connecting people, she is helping strengthen ties between doctors and the team and contributing to forming Uprising Medical’s club at ASU. She fully supports its mission and growth.',
+      
+    },
+    'ops-director': {
+      name: 'Suprathik Gangone',
+      role: 'Operations Director',
+      img: '/media/team/sg.jpg',
+      bio: 'Suprathik Gangone studies Business Administration at ASU. Driven and ambitious, he is passionate about leadership, public speaking, and entrepreneurship. Actively participating in MUN, theatre, and business plan competitions, he continually pushes himself to grow, create impact, and leave a meaningful mark on society.',
+      
+    },
+    'tech-exec-rk': {
+      name: 'Rohan Kshatriya',
+      role: 'Technical Executive',
+      img: '/media/team/rk.jpg',
+      bio: 'Rohan is a Computer Science student at ASU with experience in medical AI and research at Harvard Medical School. As Technical Executive at Uprising Medical, he designs the platform’s infrastructure, builds backend features, integrates databases, and develops tools that connect students with real-world healthcare challenges.',
+      
+    },
+    'tech-exec-sa': {
+      name: 'Sarthak Avaiya',
+      role: 'Technical Executive',
+      img: '/media/team/sa.jpg',
+      bio: 'Sarthak Avaiya is a Master’s student in Computer Science at Stevens Institute of Technology. As a volunteer Software Developer at Uprising Medical, he applies his technical skills to build user-friendly digital solutions, making healthcare more accessible and impactful, while combining academic knowledge with real-world applications to serve communities in need.',
+      
+    }
+  };
+
+  function openAboutProfile(key) {
+    const p = teamProfiles[key];
+    if (!p) return;
+    const modal = document.getElementById('aboutProfileModal');
+    const content = document.getElementById('aboutModalContent');
+    content.innerHTML = `
+      <div class="profile-header" style="display:flex; gap:1rem; align-items:center; margin-bottom:.75rem;">
+        <img src="${p.img}" alt="Photo of ${p.name}" style="width:84px; height:84px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none'">
+        <div>
+          <h3 style="margin:.1rem 0">${p.name}</h3>
+          <div class="role" style="color:#4b5563">${p.role}</div>
         </div>
       </div>
-    </section>
+      <p style="margin:.5rem 0 1rem; line-height:1.6;">${p.bio}</p>
+      <div class="profile-links">
+        ${p.links?.linkedin ? `<a href="${p.links.linkedin}" target="_blank" rel="noopener">LinkedIn</a>` : ''}
+        ${p.links?.email ? `<a href="${p.links.email}">Email</a>` : ''}
+      </div>
+    `;
+    modal.classList.add('open');
+  }
+
+  function closeAboutProfile() {
+    document.getElementById('aboutProfileModal').classList.remove('open');
+  }
+</script>
+
 
     <!-- Profile Modal -->
     <div id="aboutProfileModal" class="modal" aria-modal="true" role="dialog">
