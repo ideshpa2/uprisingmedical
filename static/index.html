@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Uprising Medical - Connecting Engineers to Medical Innovation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Single, light theme (remove ALL other <style> blocks) -->
+  <style>
+    :root{
+      --bg:#ffffff; --text:#2c3e50; --muted:#666;
+      --primary:#667eea; --secondary:#764ba2; --ring:rgba(102,126,234,.35);
+      --card:#ffffff; --border:#f0f0f0; --shadow:0 6px 16px rgba(0,0,0,.08);
+      --btn:#4a90e2; --btn-hover:#3578d4;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+
+    /* Nav */
+    nav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.95);
+        backdrop-filter:blur(10px);box-shadow:0 1px 10px rgba(0,0,0,.08);padding:.75rem 0}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 2rem}
+    .logo{font-weight:700;font-size:1.25rem;background:linear-gradient(45deg,var(--primary),var(--secondary));
+          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .nav-links{list-style:none;display:flex;gap:1rem}
+    .nav-links a{color:var(--text);text-decoration:none;font-weight:500;padding:.4rem .8rem;border-radius:20px;transition:.2s}
+    .nav-links a:hover,.nav-links a.active{background:rgba(102,126,234,.1)}
+
+    /* Sections & cards */
+    .content-section{display:none;padding:2.25rem 1rem}
+    .content-section.active{display:block}
+    .container{max-width:1100px;margin:0 auto}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:1.25rem}
+
+    /* Hero */
+    .hero{margin-top:60px;background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
+          color:#fff;text-align:center;padding:3rem 2rem 2rem;border-radius:12px}
+    .hero h1{font-size:2.4rem;margin:.2rem 0 .6rem}
+    .hero p{opacity:.95;max-width:700px;margin:0 auto}
+
+    /* Forms & controls */
+    input,textarea,select,button{font-size:1rem}
+    input,textarea,select{
+      width:100%;padding:.7rem .8rem;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);
+      outline:none;transition:border-color .15s, box-shadow .15s
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 .2rem var(--ring)}
+    button{background:var(--btn);color:#fff;border:none;border-radius:10px;padding:.7rem 1rem;cursor:pointer;font-weight:600;transition:.15s}
+    button:hover{background:var(--btn-hover)}
+    .muted{color:var(--muted)}
+    .list{display:flex;flex-direction:column;gap:1rem}
+    .item{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:1rem}
+
+    /* Chips */
+    .chip{display:inline-block;background:rgba(102,126,234,.1);color:var(--primary);border:1px solid rgba(102,126,234,.2);
+          padding:.25rem .5rem;border-radius:999px;font-size:.85rem}
+
+    /* Footer */
+    footer{background:#f8fafc;border-top:1px solid var(--border);color:var(--muted);text-align:center;padding:2rem 0;margin-top:2rem}
+
+    /* Team grid + modal (from your About file, adapted to light theme) */
+    .um-team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+    .um-team-card{cursor:pointer;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:1rem;transition:transform .12s}
+    .um-team-card:hover{transform:translateY(-2px)}
+    .um-photo{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(102,126,234,.1);color:var(--primary);font-weight:700;margin-bottom:.5rem}
+    .um-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000}
+    .um-modal-content{background:#fff;border-radius:14px;box-shadow:var(--shadow);max-width:520px;margin:10vh auto;padding:1.25rem}
+    .um-close{float:right;font-size:1.5rem;cursor:pointer}
+
+    /* === ABOUT PAGE THEME EXTRAS === */
+    .about-hero{
+    margin-top:60px; position:relative; color:#fff; text-align:center;
+    padding:3rem 2rem 2rem; border-radius:12px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    }
+    .about-hero::before{
+    content:""; position:absolute; inset:0;
+    background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0 L0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23g)"/></svg>');
+    animation:gridMove 20s linear infinite;
+    border-radius:12px;
+    }
+    @keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(10px,10px)}}
+
+    .mission-vision{display:flex;justify-content:center;gap:1.25rem;margin:2rem 0 3rem}
+    .info-card{
+    background:#fff;padding:2rem;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.08);
+    border:1px solid #f0f0f0;transition:.3s;text-align:center;height:280px;display:flex;flex-direction:column;justify-content:center
+    }
+    .info-card:hover{transform:translateY(-5px);box-shadow:0 15px 30px rgba(102,126,234,.15)}
+    .info-card h2{color:#667eea;font-size:1.8rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:10px}
+    .info-card i{color:#764ba2;font-size:1.5rem}
+    .info-card p{color:#666;line-height:1.6;flex-grow:1;display:flex;align-items:center}
+
+    /* Team */
+    .team-section h2{
+    font-size:2.5rem;text-align:center;margin:3rem 0 2rem;
+    background:linear-gradient(45deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+    }
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:1200px;margin:0 auto}
+    .team-card{
+    background:#fff;padding:2rem 1.5rem;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.08);
+    border:1px solid #f0f0f0;transition:.3s;text-align:center;cursor:pointer;height:380px;width:280px;display:flex;flex-direction:column;justify-content:space-between;margin:0 auto
+    }
+    .team-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(102,126,234,.15)}
+    .profile-photo{
+    width:120px;height:120px;border-radius:50%;
+    background:linear-gradient(45deg,#667eea,#764ba2);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:700;box-shadow:0 5px 15px rgba(102,126,234,.3);transition:.3s;flex-shrink:0
+    }
+    .team-card:hover .profile-photo{transform:scale(1.05)}
+    .team-card h3{color:#2c3e50;font-size:1.1rem;margin:.5rem 0 .25rem;font-weight:600}
+    .team-card .role{color:#667eea;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem}
+    .team-card p{color:#666;font-size:.85rem;line-height:1.4}
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(5px)}
+    .modal-content{
+    background:#fff;margin:5% auto;padding:3rem;border-radius:20px;width:90%;max-width:600px;position:relative;text-align:center;animation:modalSlideIn .3s ease-out
+    }
+    @keyframes modalSlideIn{from{opacity:0;transform:translateY(-50px)}to{opacity:1;transform:translateY(0)}}
+    .close{position:absolute;right:1.5rem;top:1.5rem;font-size:2rem;color:#aaa;cursor:pointer}
+    .close:hover{color:#667eea}
+
+  </style>
+
+  <style>
+  .team-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .team-card { display:flex; gap:.9rem; padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); cursor:pointer; }
+  .profile-photo { width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#374151; flex:0 0 72px; }
+  .profile-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .team-content h3 { margin:0 0 .25rem; }
+  .team-content .role { font-size:.9rem; color:#4b5563; margin-bottom:.35rem; }
+  /* Simple modal defaults (adjust if you already have styles) */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; padding:1rem; }
+  .modal.open { display:flex; }
+  .modal-content { background:#fff; max-width:720px; width:100%; border-radius:.75rem; padding:1rem 1.25rem; position:relative; }
+  .modal-content .close { position:absolute; right:.75rem; top:.5rem; font-size:1.5rem; cursor:pointer; }
+  .profile-header { display:flex; gap:1rem; align-items:center; margin-bottom:.75rem; }
+  .profile-header img { width:84px; height:84px; border-radius:50%; object-fit:cover; }
+  .profile-links a { margin-right:.75rem; }
+</style>
+
+</head>
+
+<body>
+<nav>
+    <div class="nav-container">
+        <div class="logo">Uprising Medical</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showSection('home')">Home</a></li>
+            <li><a href="#" onclick="showSection('about')">About</a></li>
+            <li><a href="#" onclick="showSection('challenges')">Challenges</a></li>
+            <li><a href="#" onclick="showSection('submit')">Submit a Problem</a></li>
+            <li><a href="#" onclick="showSection('teams')">Teams</a></li>
+            <li><a href="#" onclick="showSection('login')">Login</a></li>
+            <li><a href="#" onclick="showSection('signup')">Sign Up</a></li>
+            <li id="adminNav" style="display:none;">
+                <a href="#" onclick="showSection('admin'); loadPendingProblems();">Admin</a>
+            </li>
+        </ul>
+        <div class="mobile-menu" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+    </div>
+</nav>
+
+<!-- Video Section -->
+<!-- Top CTA Banner -->
+<div id="topCta"
+     style="position:sticky; top:0; z-index:9999; background:linear-gradient(90deg,#0f172a,#1e293b);
+            color:#fff; padding:.75rem 1rem; border-bottom:1px solid rgba(255,255,255,.12);">
+  <div style="max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:1rem;">
+    <!-- Icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z"></path>
+    </svg>
+
+    <!-- Message -->
+    <div style="flex:1; font-size:.95rem;">
+      <strong>Watch our video</strong> to learn how Uprising Medical empowers healthcare innovation.
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex; gap:.5rem;">
+      <button id="watchBtn"
+        style="appearance:none; border:none; padding:.5rem .9rem; border-radius:.5rem; font-weight:600;
+               background:#22c55e; color:#0b1b12; cursor:pointer;">
+        Watch the video
+      </button>
+      <button id="toggleBtn"
+        style="appearance:none; border:1px solid rgba(255,255,255,.25); padding:.5rem .9rem; border-radius:.5rem;
+               background:transparent; color:#fff; font-weight:600; cursor:pointer;">
+        Pause
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Your existing video section -->
+<section id="home" class="content-section active" style="min-height:100vh">
+  <div class="container" style="position:relative; min-height:100vh; overflow:hidden;">
+    <video id="heroVideo" autoplay muted loop playsinline
+           style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;">
+      <source src="/media/hero.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,.35); z-index:1;"></div>
+
+    <!-- Optional on-video tiny control (can remove if you prefer just the top banner) -->
+    <div style="position:absolute; bottom:20px; right:20px; z-index:2;">
+      <button id="inlineToggle"
+        style="appearance:none; border:none; padding:.4rem .7rem; border-radius:.375rem; font-weight:600;
+               background:rgba(255,255,255,.85); color:#0f172a; cursor:pointer;">
+        Pause
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const video = document.getElementById('heroVideo');
+  const watchBtn = document.getElementById('watchBtn');
+  const toggleBtn = document.getElementById('toggleBtn');
+  const inlineToggle = document.getElementById('inlineToggle');
+
+  function setButtonsPlayingState(isPlaying) {
+    const text = isPlaying ? 'Pause' : 'Play';
+    toggleBtn.textContent = text;
+    inlineToggle.textContent = text;
+  }
+
+  // Smooth scroll to video and play
+  watchBtn.addEventListener('click', async () => {
+    document.getElementById('home').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try { await video.play(); } catch (e) {}
+    setButtonsPlayingState(true);
+  });
+
+  // Toggle from banner
+  toggleBtn.addEventListener('click', async () => {
+    if (video.paused) {
+      try { await video.play(); } catch (e) {}
+      setButtonsPlayingState(true);
+    } else {
+      video.pause();
+      setButtonsPlayingState(false);
+    }
+  });
+
+  // Toggle from inline button
+  inlineToggle.addEventListener('click', () => {
+    if (video.paused) {
+      video.play();
+      setButtonsPlayingState(true);
+    } else {
+      video.pause();
+      setButtonsPlayingState(false);
+    }
+  });
+
+  // Keep label in sync if user uses native controls or autoplay fails
+  video.addEventListener('play', () => setButtonsPlayingState(true));
+  video.addEventListener('pause', () => setButtonsPlayingState(false));
+</script>
+
+<section id="about" class="content-section">
+  <div class="container">
+    <!-- Hero -->
+    <div class="about-hero card">
+      <h1 style="margin:.2rem 0 .6rem">About Uprising Medical</h1>
+      <p style="opacity:.95;max-width:700px;margin:0 auto">
+        We connect medical professionals with engineering students to co-create real, deployable healthcare solutions.
+      </p>
+    </div>
+
+    <!-- Team -->
+    <!-- ===== Team Section (drop-in) ===== -->
+<section class="team-section">
+  <h2>Meet Our Team</h2>
+
+  <!-- Our Story -->
+  <div class="team-intro card" style="padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); margin-bottom:1rem;">
+    <h3 style="margin:.25rem 0 .5rem;">Our Story</h3>
+    <p style="margin:0; line-height:1.6;">
+      Uprising Medical was founded on <strong>November 19, 2024</strong>, by <strong>Dhruvrajsinh Chauhan</strong> and later joined by <strong>Leul Mesfin</strong>, with the vision of bridging the gap between real-world healthcare challenges and innovative problem solvers. The platform enables doctors, professionals, and the public to submit medical challenges, which engineering students then collaborate on to develop creative and practical solutions. Our mission is to foster innovation, connect communities, and enhance healthcare accessibility through collaborative problem-solving. Guided by our vision of accelerating medical innovation, our dedicated volunteer team works entirely without compensation, driven by a shared commitment to improving lives through the intersection of engineering and healthcare.
+    </p>
+  </div>
+
+  <div class="team-grid">
+    <!-- Founder -->
+    <div class="team-card" onclick="openAboutProfile('founder1')">
+      <div class="profile-photo">
+        <img src="/media/team/dc.jpg" alt="Photo of Dhruvrajsinh Chauhan"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='DC';">
+      </div>
+      <div class="team-content">
+        <h3>Dhruvrajsinh Chauhan</h3>
+        <div class="role">Founder</div>
+        <p>Founder and guiding force behind Uprising Medical.</p>
+      </div>
+    </div>
+
+    <!-- Co-Founder -->
+    <div class="team-card" onclick="openAboutProfile('cofounder1')">
+      <div class="profile-photo">
+        <img src="/media/team/lm.jpg" alt="Photo of Leul Mesfin"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='LM';">
+      </div>
+      <div class="team-content">
+        <h3>Leul Mesfin</h3>
+        <div class="role">Co-Founder</div>
+        <p>Biomedical Engineering (ASU), specializing in biomedical devices.</p>
+      </div>
+    </div>
+
+    <!-- Technical Director -->
+    <div class="team-card" onclick="openAboutProfile('tech-director')">
+      <div class="profile-photo">
+        <img src="/media/team/id.jpg" alt="Photo of Ishita Deshpande"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='ID';">
+      </div>
+      <div class="team-content">
+        <h3>Ishita Deshpande</h3>
+        <div class="role">Technical Director</div>
+        <p>Leads UI and platform functionality; JavaScript/React focus.</p>
+      </div>
+    </div>
+
+    <!-- Social Media Director -->
+    <div class="team-card" onclick="openAboutProfile('social-director')">
+      <div class="profile-photo">
+        <img src="/media/team/tp.jpg" alt="Photo of Tristan Puskarov"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='TP';">
+      </div>
+      <div class="team-content">
+        <h3>Tristan Puskarov</h3>
+        <div class="role">Social Media Director</div>
+        <p>Creates engaging content to amplify mission and outreach.</p>
+      </div>
+    </div>
+
+    <!-- PR Director -->
+    <div class="team-card" onclick="openAboutProfile('pr-director')">
+      <div class="profile-photo">
+        <img src="/media/team/gn.jpg" alt="Photo of Gwendylin Nguyen"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='GN';">
+      </div>
+      <div class="team-content">
+        <h3>Gwendylin Nguyen</h3>
+        <div class="role">PR Director</div>
+        <p>Strengthens ties with clinicians and builds the ASU club.</p>
+      </div>
+    </div>
+
+    <!-- Operations Director -->
+    <div class="team-card" onclick="openAboutProfile('ops-director')">
+      <div class="profile-photo">
+        <img src="/media/team/sg.jpg" alt="Photo of Suprathik Gangone"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='SG';">
+      </div>
+      <div class="team-content">
+        <h3>Suprathik Gangone</h3>
+        <div class="role">Operations Director</div>
+        <p>Operations, leadership, and community impact initiatives.</p>
+      </div>
+    </div>
+
+    <!-- Technical Executive -->
+    <div class="team-card" onclick="openAboutProfile('tech-exec-rk')">
+      <div class="profile-photo">
+        <img src="/media/team/rk.jpg" alt="Photo of Rohan Kshatriya"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='RK';">
+      </div>
+      <div class="team-content">
+        <h3>Rohan Kshatriya</h3>
+        <div class="role">Technical Executive</div>
+        <p>Designs infrastructure, backend features, and data integrations.</p>
+      </div>
+    </div>
+
+    <!-- Technical Executive -->
+    <div class="team-card" onclick="openAboutProfile('tech-exec-sa')">
+      <div class="profile-photo">
+        <img src="/media/team/sa.jpg" alt="Photo of Sarthak Avaiya"
+             loading="lazy" onerror="this.remove(); this.parentElement.textContent='SA';">
+      </div>
+      <div class="team-content">
+        <h3>Sarthak Avaiya</h3>
+        <div class="role">Technical Executive</div>
+        <p>Builds user-friendly solutions bringing impact to communities.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Minimal styles (use once, or remove if you already have these) -->
+<style>
+  .team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
+  .team-card { display:flex; gap:.9rem; padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); cursor:pointer; }
+  .profile-photo { width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#374151; flex:0 0 72px; }
+  .profile-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .team-content h3 { margin:0 0 .2rem; }
+  .team-content .role { font-size:.9rem; color:#4b5563; margin-bottom:.35rem; }
+</style>
+
+<script>
+  // Modal data & wiring (uses your existing #aboutProfileModal and #aboutModalContent)
+  const teamProfiles = {
+    'founder1': {
+      name: 'Dhruvrajsinh Chauhan',
+      role: 'Founder',
+      img: '/media/team/dc.jpg',
+      bio: 'Dhruvrajsinh Chauhan is the founder and guiding force behind Uprising Medical, leading all aspects of the initiative. With strengths in innovation, cross-functional collaboration, platform development, and stakeholder engagement, he drives the team and ensures the platform effectively addresses real-world healthcare challenges through engineering solutions.',
+      links: { linkedin: '#', email: '' }
+    },
+    'cofounder1': {
+      name: 'Leul Mesfin',
+      role: 'Co-Founder',
+      img: '/media/team/lm.jpg',
+      bio: 'Leul Mesfin is the co-founder of Uprising Medical and is majoring in Biomedical Engineering at ASU specializing in biomedical devices. With experience in managing budgets, refining designs with CAD software, and collaborating across disciplines, his goal is the same: to turn ideas into tangible devices that improve lives. With a foundation in project leadership and product development, he is driven to contribute to the next generation of healthcare innovations.',
+       
+    },
+    'tech-director': {
+      name: 'Ishita Deshpande',
+      role: 'Technical Director',
+      img: '/media/team/id.jpg',
+      bio: 'Ishita Deshpande is a Computer Science major at ASU, specializing in JavaScript, React, and web design. At Uprising Medical, she leads the development of the website’s UI and functionality, connecting users and teams. Passionate about technology, she builds solutions that make engineering collaboration more accessible and impactful.',
+       
+    },
+    'social-director': {
+      name: 'Tristan Puskarov',
+      role: 'Social Media Director',
+      img: '/media/team/tp.jpg',
+      bio: 'Tristan is a sophomore Aerospace Engineering student at ASU and serves as the Social Media Director for Uprising Medical. He manages the organization’s social media presence, creating engaging and informative posts that share its mission and goals, helping people from all over connect with and contribute to the platform’s initiatives.',
+      
+    },
+    'pr-director': {
+      name: 'Gwendylin Nguyen',
+      role: 'PR Director',
+      img: '/media/team/gn.jpg',
+      bio: 'Gwendylin Nguyen is a sophomore double majoring in Biomedical Engineering and Management and serves as the PR Director of Uprising Medical. Passionate about connecting people, she is helping strengthen ties between doctors and the team and contributing to forming Uprising Medical’s club at ASU. She fully supports its mission and growth.',
+      
+    },
+    'ops-director': {
+      name: 'Suprathik Gangone',
+      role: 'Operations Director',
+      img: '/media/team/sg.jpg',
+      bio: 'Suprathik Gangone studies Business Administration at ASU. Driven and ambitious, he is passionate about leadership, public speaking, and entrepreneurship. Actively participating in MUN, theatre, and business plan competitions, he continually pushes himself to grow, create impact, and leave a meaningful mark on society.',
+      
+    },
+    'tech-exec-rk': {
+      name: 'Rohan Kshatriya',
+      role: 'Technical Executive',
+      img: '/media/team/rk.jpg',
+      bio: 'Rohan is a Computer Science student at ASU with experience in medical AI and research at Harvard Medical School. As Technical Executive at Uprising Medical, he designs the platform’s infrastructure, builds backend features, integrates databases, and develops tools that connect students with real-world healthcare challenges.',
+      
+    },
+    'tech-exec-sa': {
+      name: 'Sarthak Avaiya',
+      role: 'Technical Executive',
+      img: '/media/team/sa.jpg',
+      bio: 'Sarthak Avaiya is a Master’s student in Computer Science at Stevens Institute of Technology. As a volunteer Software Developer at Uprising Medical, he applies his technical skills to build user-friendly digital solutions, making healthcare more accessible and impactful, while combining academic knowledge with real-world applications to serve communities in need.',
+      
+    }
+  };
+
+  function openAboutProfile(key) {
+    const p = teamProfiles[key];
+    if (!p) return;
+    const modal = document.getElementById('aboutProfileModal');
+    const content = document.getElementById('aboutModalContent');
+    content.innerHTML = `
+      <div class="profile-header" style="display:flex; gap:1rem; align-items:center; margin-bottom:.75rem;">
+        <img src="${p.img}" alt="Photo of ${p.name}" style="width:84px; height:84px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none'">
+        <div>
+          <h3 style="margin:.1rem 0">${p.name}</h3>
+          <div class="role" style="color:#4b5563">${p.role}</div>
+        </div>
+      </div>
+      <p style="margin:.5rem 0 1rem; line-height:1.6;">${p.bio}</p>
+      <div class="profile-links">
+        ${p.links?.linkedin ? `<a href="${p.links.linkedin}" target="_blank" rel="noopener">LinkedIn</a>` : ''}
+        ${p.links?.email ? `<a href="${p.links.email}">Email</a>` : ''}
+      </div>
+    `;
+    modal.classList.add('open');
+  }
+
+  function closeAboutProfile() {
+    document.getElementById('aboutProfileModal').classList.remove('open');
+  }
+</script>
+
+
+    <!-- Profile Modal -->
+    <div id="aboutProfileModal" class="modal" aria-modal="true" role="dialog">
+      <div class="modal-content">
+        <span class="close" onclick="closeAboutProfile()">&times;</span>
+        <div id="aboutModalContent"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="submit" class="content-section">
+  <div class="container">
+    <h2 class="logo" style="font-size:1.75rem;margin-bottom:1rem;text-align:center">Submit a Problem</h2>
+    <form id="problemForm" class="card" style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:1rem">
+      <input id="title" type="text" placeholder="Problem Title" required/>
+      <textarea id="description" rows="5" placeholder="Describe the problem..." required></textarea>
+      <select id="category" required>
+        <option value="">Select a category</option>
+        <option value="Diagnostics">Diagnostics</option>
+        <option value="Prosthetics">Prosthetics</option>
+        <option value="Software">Software</option>
+        <option value="Medical Device">Medical Device</option>
+      </select>
+      <button type="submit">Submit Problem</button>
+    </form>
+    <p id="formMessage" class="muted" style="text-align:center;margin-top:1rem"></p>
+  </div>
+</section>
+
+<section id="challenges" class="content-section">
+  <div class="container">
+    <h2 class="logo" style="font-size:1.75rem;margin-bottom:1rem">Open Challenges</h2>
+    <div id="challengesList" class="list"></div>
+  </div>
+</section>
+
+<!-- Admin Page -->
+<section id="admin" class="content-section">
+    <h2 style="text-align:center;">Admin Panel</h2>
+
+<!-- Create Team -->
+<div class="card" style="max-width:600px;margin:2rem auto;">
+  <h3 style="color:#4a90e2;margin-top:0">Create a New Team</h3>
+  <form id="createTeamForm" style="display:flex;flex-direction:column;gap:1rem;margin-top:1rem;">
+    <input type="text" id="teamNameCreate" placeholder="Team Name" required>
+    <textarea id="teamDescCreate" placeholder="Describe your team..." rows="3"></textarea>
+    <button type="submit">Create Team</button>
+  </form>
+  <p id="createTeamMessage" class="muted" style="text-align:center;margin-top:1rem;"></p>
+</div>
+
+<!-- Pending Join Requests -->
+<div class="card" style="max-width:800px;margin:2rem auto;">
+  <h3 style="color:#4a90e2;margin-top:0">Pending Join Requests</h3>
+  <div id="joinRequests" class="list" style="margin-top:1rem;"></div>
+</div>
+
+<!-- Pending Problem Approvals -->
+<div class="card" style="max-width:800px;margin:2rem auto;">
+  <h3 style="color:#4a90e2;margin-top:0">Pending Problem Approvals</h3>
+  <div id="pendingProblems" class="list" style="margin-top:1rem;"></div>
+</div>
+
+
+</section>
+
+<section id="signup" class="content-section">
+  <h2 style="text-align:center;">Sign Up</h2>
+  <form id="signupForm">
+    <input type="text" id="signupUsername" placeholder="Username" required>
+    <input type="password" id="signupPassword" placeholder="Password" required>
+
+    <select id="signupRole" required>
+      <option value="">Select Role</option>
+      <option value="STUDENT">Student</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+
+    <!-- Shown only when role = ADMIN -->
+    <input type="password" id="signupAdminCode"
+           placeholder="Admin Code"
+           style="display:none;">
+    <button type="submit">Sign Up</button>
+  </form>
+  <p id="signupMessage" style="text-align:center; margin-top:1rem;"></p>
+</section>
+
+
+<section id="teams" class="content-section">
+    <h2 style="text-align:center;">Available Teams</h2>
+    <div id="teamsList" style="max-width:600px; margin:auto; display:flex; flex-direction:column; gap:1rem;">
+        <!-- Teams will be loaded dynamically -->
+    </div>
+</section>
+
+<section id="login" class="content-section">
+    <h2 style="text-align:center;">Login</h2>
+    <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Username" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p id="loginMessage" style="text-align:center; margin-top:1rem;"></p>
+</section>
+
+<script>
+  // Profile data (trimmed; extend as desired)
+  const UM_PROFILES = {
+    founder1: {
+      photo:'DC', name:'Dhruvrajsinh Chauhan', role:'Founder',
+      bio:`Visionary founder bridging engineering and clinical needs to improve outcomes.`
+    },
+    cofounder1: {
+      photo:'LM', name:'Leul Mesfin', role:'Co-Founder',
+      bio:`Software engineer and medical systems architect driving technical roadmap.`
+    },
+    'tech-director': {
+      photo:'ID', name:'Ishita Deshpande', role:'Technical Director',
+      bio:`Leads HIPAA-compliant platform engineering and integrations.`
+    },
+    'social-director': {
+      photo:'TP', name:'Tristan Puskarov', role:'Social Media Director',
+      bio:`Builds outreach and patient education programs.`
+    }
+  };
+
+  function openProfile(id){
+    const p = UM_PROFILES[id]; if(!p) return;
+    const m = document.getElementById('profileModal');
+    const body = document.getElementById('modalBody');
+    body.innerHTML = `
+      <div class="um-photo" style="width:140px;height:140px;font-size:2rem;margin-bottom:1rem">${p.photo}</div>
+      <h3 style="margin:.25rem 0 0">${p.name}</h3>
+      <div class="role" style="color:#667eea;margin:.25rem 0 1rem;font-weight:600">${p.role}</div>
+      <p style="color:#555;line-height:1.6">${p.bio}</p>`;
+    m.style.display = 'block';
+  }
+  function closeProfile(){ document.getElementById('profileModal').style.display='none'; }
+  window.addEventListener('click', (e)=> {
+    const m=document.getElementById('profileModal'); if(e.target===m) closeProfile();
+  });
+</script>
+
+
+<footer><p>&copy; 2025 Uprising Medical</p></footer>
+
+<script>
+// Navigation
+function showSection(sectionId) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(sectionId)?.classList.add('active');
+
+  // highlight active nav link
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const link = [...document.querySelectorAll('.nav-links a')]
+    .find(a => a.getAttribute('onclick')?.includes(sectionId));
+  if (link) link.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (sectionId === 'challenges') loadChallenges();
+  if (sectionId === 'teams') loadTeams();
+  if (sectionId === 'admin') { loadPendingProblems(); loadJoinRequests(); }
+}
+
+// default view
+document.addEventListener('DOMContentLoaded', () => {
+  showSection('home');
+  loadChallenges(); // warm cache
+});
+
+
+
+
+// Submit Problem
+// Submit Problem
+document.getElementById("problemForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = e.submitter || e.target.querySelector("button[type=submit]");
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const category = document.getElementById("category").value;
+  const msg = document.getElementById("formMessage");
+
+  if (!title || !description || !category) { msg.textContent = "Please fill all fields."; return; }
+
+  btn.disabled = true; btn.textContent = "Submitting…"; msg.textContent = "";
+
+  try {
+    const res = await fetch("http://localhost:8080/problems", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, description, category })
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    msg.textContent = "Submitted! Awaiting admin approval.";
+    e.target.reset();
+    // optional refresh
+    typeof loadPendingProblems === "function" && loadPendingProblems();
+    typeof loadChallenges === "function" && loadChallenges();
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Submission failed. See console.";
+  } finally {
+    btn.disabled = false; btn.textContent = "Submit Problem";
+  }
+});
+
+// Load Challenges
+async function loadChallenges() {
+    const container = document.getElementById("challengesList");
+    container.innerHTML = "<p>Loading challenges...</p>";
+    try {
+        const res = await fetch("http://localhost:8080/problems");
+        const problems = await res.json();
+        container.innerHTML = problems.length === 0
+  ? "<p class='muted'>No approved challenges yet.</p>"
+  : problems.map(p => `
+      <div class="item">
+        <h3 style="margin:0 0 .25rem 0">${p.title}</h3>
+        <p class="muted" style="margin:.25rem 0 .5rem 0">${p.description}</p>
+        <span class="chip">Category: ${p.category}</span>
+      </div>`).join("");
+
+    } catch {
+        container.innerHTML = "<p style='color:red;'>Error loading challenges.</p>";
+    }
+}
+
+function toggleMenu(){
+  const links = document.querySelector('.nav-links');
+  links.style.display = (links.style.display === 'flex' ? '' : 'flex');
+}
+
+
+// Load Pending Problems
+async function loadPendingProblems() {
+    const container = document.getElementById("pendingProblems");
+    container.innerHTML = "<p>Loading pending problems...</p>";
+    try {
+        const res = await fetch("http://localhost:8080/problems/pending");
+        const problems = await res.json();
+        container.innerHTML = problems.length === 0
+            ? "<p>No pending problems.</p>"
+            : "";
+        problems.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "item";
+        card.innerHTML = `
+            <h3 style="margin:0 0 .25rem 0">${p.title}</h3>
+            <p class="muted" style="margin:.25rem 0"><strong>Category:</strong> ${p.category}</p>
+            <p class="muted" style="margin:.25rem 0">${p.description}</p>
+            <button onclick="approveProblem(${p.id})">Approve</button>`;
+        container.appendChild(card);
+        });
+    } catch {
+        container.innerHTML = "<p style='color:red;'>Error loading pending problems.</p>";
+    }
+}
+
+// Approve Problem
+async function approveProblem(id) {
+    try {
+        const res = await fetch(`http://localhost:8080/problems/${id}/approve`, { method: "PATCH" });
+        if (res.ok) {
+            alert("Problem approved!");
+            loadPendingProblems();
+            loadChallenges();
+        } else {
+            alert("Failed to approve problem.");
+        }
+    } catch {
+        alert("Error approving problem.");
+    }
+}
+
+// Sign Up
+// Show/hide Admin Code based on role
+document.getElementById("signupRole").addEventListener("change", (e) => {
+  const adminCodeInput = document.getElementById("signupAdminCode");
+  adminCodeInput.style.display = e.target.value === "ADMIN" ? "block" : "none";
+  if (e.target.value !== "ADMIN") adminCodeInput.value = "";
+});
+
+// Submit handler
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = {
+    username: signupUsername.value.trim(),
+    password: signupPassword.value,
+    role: signupRole.value,
+    adminCode: signupRole.value === "ADMIN" ? signupAdminCode.value : null
+  };
+  const res = await fetch("/auth/register", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  const text = await res.text();
+  signupMessage.textContent = res.ok ? text : text || "Error creating account.";
+  // do NOT auto-login unless you want to
+});
+
+
+// Login
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const username = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
+    try {
+        const res = await fetch("http://localhost:8080/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ username, password })
+        });
+        const text = await res.text();
+        if (res.ok) {
+              document.getElementById("loginMessage").textContent = text;
+            // ✅ persist who is logged in so requests know the username
+            localStorage.setItem("username", username);
+            localStorage.setItem("role", text.includes("ADMIN") ? "ADMIN" : "STUDENT");
+            if (text.includes("ADMIN")) {
+                document.getElementById("adminNav").style.display = "inline-block";
+        }
+            
+        } else {
+            document.getElementById("loginMessage").textContent = "Invalid username or password.";
+        }
+    } catch {
+        document.getElementById("loginMessage").textContent = "Failed to connect to server.";
+    }
+});
+
+// Create Team (Admin Only)
+document.getElementById("createTeamForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const data = {
+        name: document.getElementById("teamNameCreate").value,
+        description: document.getElementById("teamDescCreate").value
+    };
+
+    try {
+        const res = await fetch("http://localhost:8080/teams", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        document.getElementById("createTeamMessage").textContent = res.ok
+            ? "Team created successfully!"
+            : "Failed to create team.";
+        if (res.ok) {
+            this.reset();
+            loadTeams(); // refresh team list
+        }
+    } catch {
+        document.getElementById("createTeamMessage").textContent = "Unable to connect to server.";
+    }
+});
+
+// Load Teams (for Teams Page)
+async function loadTeams() {
+  const container = document.getElementById("teamsList");
+  if (!container) return;
+
+  container.innerHTML = "<p>Loading teams...</p>";
+
+  try {
+    const res = await fetch("http://localhost:8080/teams");
+    const teams = await res.json();
+
+    if (!Array.isArray(teams) || teams.length === 0) {
+      container.innerHTML = "<p>No teams yet.</p>";
+      return;
+    }
+
+    const getId = (t) => Number.isFinite(t?.id) ? t.id : null;
+
+    container.innerHTML = teams.map(t => {
+      const id = getId(t);
+      return `
+  <div class="item">
+    <h3 style="margin:0 0 .25rem 0">${t.name ?? ''}</h3>
+    <p class="muted" style="margin:.25rem 0">${t.description ?? "No description provided."}</p>
+    <button class="join-btn" data-team-id="${id}" style="margin-top:.5rem">Request to Join</button>
+    <div class="members" id="members-${id}" class="muted" style="margin-top:.5rem">
+      <em>${id == null ? "No id available" : "Loading members..."}</em>
+    </div>
+  </div>`;
+    }).join("");
+
+    // Fetch approved members for each team
+    for (const t of teams) {
+      const id = getId(t);
+      if (id == null) continue;
+      const box = document.getElementById(`members-${id}`);
+      if (!box) continue;
+      try {
+        const mRes = await fetch(`http://localhost:8080/teams/${id}/members`);
+        if (!mRes.ok) { box.innerHTML = "<em>No approved members yet.</em>"; continue; }
+        const members = await mRes.json();
+        box.innerHTML = (Array.isArray(members) && members.length)
+          ? `<strong>Members:</strong> ${members.join(", ")}`
+          : `<em>No approved members yet.</em>`;
+      } catch {
+        box.innerHTML = "<span style='color:#d9534f;'>Failed to load members.</span>";
+      }
+    }
+  } catch {
+    container.innerHTML = "<p style='color:red;'>Error loading teams.</p>";
+  }
+
+  // Attach once
+  if (!container.dataset.joinHandlerBound) {
+    container.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".join-btn");
+      if (!btn || btn.disabled) return;
+
+      const teamId = Number(btn.dataset.teamId);
+      const username = localStorage.getItem("username")
+        || document.getElementById("loginUsername")?.value;
+
+      if (!Number.isFinite(teamId)) return alert("Invalid team id.");
+      if (!username) return alert("Please log in before sending a join request.");
+
+      btn.disabled = true; btn.textContent = "Sending...";
+      try {
+        const res = await fetch(`http://localhost:8080/teams/${teamId}/request`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username })
+        });
+        if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        btn.textContent = "Request Sent";
+      } catch (err) {
+        console.error(err);
+        alert("Join failed. See console for details.");
+        btn.disabled = false; btn.textContent = "Request to Join";
+      }
+    });
+    container.dataset.joinHandlerBound = "true";
+  }
+}
+
+async function loadJoinRequests() {
+  const box = document.getElementById("joinRequests");
+  if (!box) return;
+  box.innerHTML = "<p>Loading requests...</p>";
+
+  try {
+    const res = await fetch("http://localhost:8080/teams/requests/pending");
+    if (!res.ok) throw new Error(await res.text());
+    const reqs = await res.json();
+
+    box.innerHTML = reqs.length ? "" : "<p class='muted'>No pending requests.</p>";
+    reqs.forEach(r => {
+    box.insertAdjacentHTML("beforeend", `
+        <div class="item">
+        <p style="margin:.25rem 0"><strong>${r.username}</strong> → Team ${r.team?.id ?? "?"}</p>
+        <div style="margin-top:.5rem;">
+            <button onclick="approveJoin(${r.id})">Approve</button>
+            <button onclick="denyJoin(${r.id})" style="margin-left:.5rem;">Deny</button>
+        </div>
+        </div>
+    `);
+    });
+
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = "<p style='color:#d9534f;'>Failed to load requests.</p>";
+  }
+}
+
+function requestToJoin(teamId, btnEl) {
+  const id = Number(teamId);
+  if (!Number.isFinite(id)) { alert("Invalid team id."); return; }
+
+  const username = localStorage.getItem("username") || document.getElementById("loginUsername")?.value;
+  if (!username) { alert("Please log in before sending a join request."); return; }
+
+  const revert = () => { if (btnEl) { btnEl.disabled = false; btnEl.textContent = "Request to Join"; } };
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "Sending..."; }
+
+  fetch(`http://localhost:8080/teams/${id}/request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username })
+  })
+  .then(async res => {
+    if (res.ok) { if (btnEl) btnEl.textContent = "Request Sent"; }
+    else {
+      const msg = await res.text().catch(()=>"");
+      alert(`Failed: ${res.status} ${msg || ""}`);
+      revert();
+    }
+  })
+  .catch(err => { console.error(err); alert("Network error."); revert(); });
+}
+
+// ✨ expose to inline onclick
+window.requestToJoin = requestToJoin;
+
+async function approveJoin(requestId) {
+  try {
+    const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/approve`, { method: "PATCH" });
+    if (res.ok) {
+      alert("Request approved!");
+      loadJoinRequests();
+      loadTeams(); // 👈 refresh members list
+    } else {
+      alert("Failed to approve request.");
+    }
+  } catch {
+    alert("Unable to process request.");
+  }
+}
+
+async function denyJoin(requestId) {
+  try {
+    const res = await fetch(`http://localhost:8080/teams/requests/${requestId}/deny`, { method: "PATCH" });
+    if (res.ok) {
+      alert("Request denied.");
+      loadJoinRequests();
+      loadTeams(); // 👈 optional, in case you want to reflect any changes
+    } else {
+      alert("Failed to deny request.");
+    }
+  } catch {
+    alert("Unable to process request.");
+  }
+}
+
+  // About page profiles (scoped so it doesn't collide with other modals)
+  const ABOUT_PROFILES = {
+    founder1: { photo:'DC', name:'Dhruvrajsinh Chauhan', role:'Founder',
+      bio:`Visionary founder bridging engineering and clinical needs to improve outcomes.` },
+    cofounder1: { photo:'LM', name:'Leul Mesfin', role:'Co-Founder',
+      bio:`Software engineer and medical systems architect driving technical roadmap.` },
+    'tech-director': { photo:'ID', name:'Ishita Deshpande', role:'Technical Director',
+      bio:`Leads HIPAA-compliant platform engineering and integrations.` },
+    'social-director': { photo:'TP', name:'Tristan Puskarov', role:'Social Media Director',
+      bio:`Builds outreach and patient education programs.` }
+  };
+
+  function openAboutProfile(id){
+    const p = ABOUT_PROFILES[id]; if(!p) return;
+    const modal = document.getElementById('aboutProfileModal');
+    const slot  = document.getElementById('aboutModalContent');
+    slot.innerHTML = `
+      <div class="profile-photo" style="width:140px;height:140px;font-size:2.2rem;margin-bottom:1rem">${p.photo}</div>
+      <h3 style="margin:.25rem 0 0">${p.name}</h3>
+      <div class="role" style="margin:.25rem 0 1rem">${p.role}</div>
+      <p style="color:#555;line-height:1.6">${p.bio}</p>`;
+    modal.style.display = 'block';
+  }
+  function closeAboutProfile(){ document.getElementById('aboutProfileModal').style.display='none'; }
+  window.addEventListener('click', (e)=> {
+    const m = document.getElementById('aboutProfileModal'); if(e.target===m) closeAboutProfile();
+  });
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Preload challenges so Home has fresh data
+  loadChallenges?.();
+
+  // Attach listeners only if the elements exist
+  document.querySelector("a[href*='challenges']")?.addEventListener("click", loadChallenges);
+  document.querySelector("a[href*='teams']")?.addEventListener("click", loadTeams);
+  document.querySelector("a[href*='admin']")?.addEventListener("click", () => {
+    loadPendingProblems?.();
+    loadJoinRequests?.();
+  });
+});
+</script>
+
+</body>
+</html>
+ 
