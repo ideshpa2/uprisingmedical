@@ -6,6 +6,10 @@ import com.example.demo.model.TeamJoinRequest;
 import com.example.demo.repository.TeamRepository;
 import com.example.demo.repository.TeamJoinRequestRepository;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 import java.util.List;
 

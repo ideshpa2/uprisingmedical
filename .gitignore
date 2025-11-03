@@ -33,3 +33,5 @@ build/
 .vscode/
 /src/main/resources/static/media/hero-original.mp4
 media/hero-original.mp4
+deploy.zip
+application.jar

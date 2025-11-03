@@ -6,6 +6,122 @@
   <title>Uprising Medical - Connecting Engineers to Medical Innovation</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
+
+<script>
+(function () {
+  const isLocal  = location.hostname === 'localhost' || location.hostname.startsWith('127.');
+  const isEBHost = /\.elasticbeanstalk\.com$/.test(location.hostname);
+  const EB       = 'http://uprising.us-east-1.elasticbeanstalk.com'; // NOTE: http (you don’t have HTTPS yet)
+
+  const BASE = isLocal ? 'http://localhost:8080'
+            : isEBHost ? ''                 // same-origin on EB
+            : EB;                           // elsewhere → call EB directly
+
+  const origFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    let url = typeof input === 'string' ? input : input?.url;
+    if (!url) return origFetch(input, init);
+
+    // rewrite localhost → BASE
+    if (/^https?:\/\/localhost:8080\//.test(url)) url = url.replace(/^https?:\/\/localhost:8080/, BASE);
+    // rewrite relative paths → BASE
+    else if (url.startsWith('/')) url = BASE + url;
+
+    return origFetch(url, init);
+  };
+
+  // Optional helper: api('/problems')
+  window.api = (path, init) =>
+    origFetch(path.startsWith('http') ? path : BASE + (path.startsWith('/') ? '' : '/') + path, init);
+})();
+</script>
+
+<script>
+  const isLocal = location.hostname === "localhost" || location.hostname.startsWith("127.");
+  const isEB    = location.hostname.includes("elasticbeanstalk.com");
+
+  // Same-origin on EB, localhost when dev, EB host when you open HTML somewhere else.
+  const BASE = isLocal ? "http://localhost:8080"
+             : isEB    ? ""  // same-origin
+             : "http://uprising.us-east-1.elasticbeanstalk.com";
+
+  const origFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    let url = typeof input === "string" ? input : input?.url;
+    if (!url) return origFetch(input, init);
+    if (/^https?:\/\/localhost:8080\//.test(url)) url = url.replace(/^https?:\/\/localhost:8080/, BASE);
+    else if (url.startsWith("/")) url = BASE + url;
+    return origFetch(url, init);
+  };
+</script>
+
+<script>
+  const ready = (fn) =>
+    document.readyState !== 'loading'
+      ? fn()
+      : document.addEventListener('DOMContentLoaded', fn);
+
+  ready(() => {
+    const $ = (id) => document.getElementById(id);
+
+    $('signupRole')?.addEventListener('change', (e) => {
+      const adminCodeInput = $('signupAdminCode');
+      if (!adminCodeInput) return;
+      adminCodeInput.style.display = e.target.value === 'ADMIN' ? 'block' : 'none';
+      if (e.target.value !== 'ADMIN') adminCodeInput.value = '';
+    });
+
+    $('signupForm')?.addEventListener('submit', onSignup);
+    $('loginForm')?.addEventListener('submit', onLogin);
+    $('createTeamForm')?.addEventListener('submit', onCreateTeam);
+
+    // Top-nav click helpers (use ?.)
+    document.querySelector("a[onclick*='challenges']")?.addEventListener('click', loadChallenges);
+    document.querySelector("a[onclick*='teams']")?.addEventListener('click', loadTeams);
+    document.querySelector("a[onclick*='admin']")?.addEventListener('click', () => {
+      loadPendingProblems?.();
+      loadJoinRequests?.();
+    });
+  });
+
+  // move your existing handlers into named functions so they’re available above:
+  async function onSignup(e){ /* existing signup submit code */ }
+  async function onLogin(e){ /* existing login submit code */ }
+  async function onCreateTeam(e){ /* existing create team code */ }
+</script>
+
+
+<script>
+// 1) Toggle the Admin Code field when role changes
+document.getElementById("signupRole").addEventListener("change", (e) => {
+  const isAdmin = e.target.value === "ADMIN";
+  const adminCodeInput = document.getElementById("signupAdminCode");
+  adminCodeInput.style.display = isAdmin ? "block" : "none";
+  if (!isAdmin) adminCodeInput.value = "";
+});
+
+// 2) Include adminCode in the registration POST when role is ADMIN
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = {
+    username: signupUsername.value.trim(),
+    password: signupPassword.value,
+    role: signupRole.value,
+    adminCode: signupRole.value === "ADMIN" ? signupAdminCode.value.trim() : undefined
+  };
+
+  const res = await fetch("/auth/register", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  });
+
+  const text = await res.text();
+  signupMessage.textContent = res.ok ? text : (text || "Error creating account.");
+});
+</script>
+
+
   <!-- Single, light theme (remove ALL other <style> blocks) -->
   <style>
     :root{
@@ -14,6 +130,8 @@
       --card:#ffffff; --border:#f0f0f0; --shadow:0 6px 16px rgba(0,0,0,.08);
       --btn:#4a90e2; --btn-hover:#3578d4;
     }
+
+    .modal.open { display: block; } 
 
     *{box-sizing:border-box}
     html,body{margin:0}
@@ -95,24 +213,29 @@
     .info-card p{color:#666;line-height:1.6;flex-grow:1;display:flex;align-items:center}
 
     /* Team */
-    .team-section h2{
-    font-size:2.5rem;text-align:center;margin:3rem 0 2rem;
-    background:linear-gradient(45deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
-    }
-    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:1200px;margin:0 auto}
-    .team-card{
-    background:#fff;padding:2rem 1.5rem;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.08);
-    border:1px solid #f0f0f0;transition:.3s;text-align:center;cursor:pointer;height:380px;width:280px;display:flex;flex-direction:column;justify-content:space-between;margin:0 auto
-    }
-    .team-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(102,126,234,.15)}
-    .profile-photo{
-    width:120px;height:120px;border-radius:50%;
-    background:linear-gradient(45deg,#667eea,#764ba2);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:700;box-shadow:0 5px 15px rgba(102,126,234,.3);transition:.3s;flex-shrink:0
-    }
-    .team-card:hover .profile-photo{transform:scale(1.05)}
-    .team-card h3{color:#2c3e50;font-size:1.1rem;margin:.5rem 0 .25rem;font-weight:600}
-    .team-card .role{color:#667eea;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem}
-    .team-card p{color:#666;font-size:.85rem;line-height:1.4}
+/* Tighten About → Team */
+.team-section h2{ margin: .75rem 0; }
+
+.team-grid{
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.team-card{
+  height: auto;      /* remove fixed height */
+  width: auto;       /* let grid size cards */
+  padding: 12px;     /* slimmer padding */
+  margin: 0;         /* avoid extra spacing */
+  justify-content: flex-start;
+}
+
+.profile-photo{ width:72px; height:72px; margin:0; }
+.team-card h3{ margin: 0 0 4px; }
+.team-card .role{ margin: 0 0 4px; }
+.team-card p{ margin: 0; line-height: 1.35; }
+
+/* Optional: trim section padding if needed */
+#about.content-section{ padding: 1rem .75rem; }
 
     /* Modal */
     .modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(5px)}
@@ -123,23 +246,109 @@
     .close{position:absolute;right:1.5rem;top:1.5rem;font-size:2rem;color:#aaa;cursor:pointer}
     .close:hover{color:#667eea}
 
-  </style>
+      #login form,
+  #signup form {
+    max-width: 360px;        /* shorter width */
+    margin: 0 auto;          /* center horizontally */
+    display: grid;           /* clean spacing */
+    gap: 12px;               /* space between fields */
+    padding: 16px;           /* slight breathing room */
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.06);
+    background: #fff;
+  }
 
-  <style>
-  .team-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-  .team-card { display:flex; gap:.9rem; padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); cursor:pointer; }
-  .profile-photo { width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#374151; flex:0 0 72px; }
-  .profile-photo img { width:100%; height:100%; object-fit:cover; display:block; }
-  .team-content h3 { margin:0 0 .25rem; }
-  .team-content .role { font-size:.9rem; color:#4b5563; margin-bottom:.35rem; }
-  /* Simple modal defaults (adjust if you already have styles) */
-  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; padding:1rem; }
-  .modal.open { display:flex; }
-  .modal-content { background:#fff; max-width:720px; width:100%; border-radius:.75rem; padding:1rem 1.25rem; position:relative; }
-  .modal-content .close { position:absolute; right:.75rem; top:.5rem; font-size:1.5rem; cursor:pointer; }
-  .profile-header { display:flex; gap:1rem; align-items:center; margin-bottom:.75rem; }
-  .profile-header img { width:84px; height:84px; border-radius:50%; object-fit:cover; }
-  .profile-links a { margin-right:.75rem; }
+  /* Inputs only inside login/signup get a slightly smaller height */
+  #login input,
+  #signup input,
+  #signup select,
+  #login button,
+  #signup button {
+    width: 100%;
+    padding: .6rem .75rem;    /* slightly shorter than default */
+    border-radius: 10px;
+  }
+
+  /* Center the headings and messages (you already do, but reinforcing here is harmless) */
+  #login h2,
+  #signup h2,
+  #login p#loginMessage,
+  #signup p#signupMessage {
+    text-align: center;
+  }
+
+  /* Optional: make the submit buttons a touch slimmer */
+  #login button,
+  #signup button {
+    font-weight: 600;
+  }
+
+  /* Keep the admin code field aligned when it becomes visible */
+  #signup #signupAdminCode {
+    margin-top: 4px;
+  }
+
+/* ——— Tighten About → Team layout ——— */
+#about.content-section { padding: 1rem 0.75rem; }
+#about .team-section h2 { margin: 0.75rem 0; }
+
+#about .team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap: 12px;                 /* tighter grid gap */
+  align-items:start;         /* avoid stretching */
+}
+
+/* === RESET bad card styles and restore readable layout === */
+
+/* Grid: reasonable columns + small gaps */
+#about .team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px;
+  align-items:start;
+}
+
+/* Card: white background (no photo as background), no fixed height/width */
+#about .team-card{
+  display:flex;
+  gap:12px;
+  background:#fff !important;        /* override any bg-image */
+  border:1px solid #f0f0f0;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+  padding:12px;
+  width:auto;                         /* was 280px */
+  height:auto;                        /* was 380px */
+  margin:0;                           /* remove auto-centering */
+  overflow:hidden;
+}
+
+/* Avatar: fixed size circle; the ONLY place the photo lives */
+#about .profile-photo{
+  width:72px; height:72px; flex:0 0 72px;
+  border-radius:50%;
+  background:#e5e7eb;
+  display:flex; align-items:center; justify-content:center;
+  margin:0;
+}
+#about .profile-photo img{
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+
+/* Text block */
+#about .team-content{ display:flex; flex-direction:column; min-width:0; }
+#about .team-content h3{ margin:0 0 4px; color:#1f2937; font-weight:600; }
+#about .team-content .role{ margin:0 0 4px; font-size:.9rem; color:#4b5563; }
+#about .team-card p{ margin:0; line-height:1.35; color:#374151; }
+
+/* Headline + section padding trimmed */
+#about.content-section{ padding:1rem .75rem; }
+#about .team-section h2{ margin:.75rem 0; }
+
+
+
 </style>
 
 </head>
@@ -150,7 +359,7 @@
         <div class="logo">Uprising Medical</div>
         <ul class="nav-links">
             <li><a href="#" onclick="showSection('home')">Home</a></li>
-            <li><a href="#" onclick="showSection('about')">About</a></li>
+            <li><a href="#" onclick="event.preventDefault(); showSection('about'); return false;">About</a></li>
             <li><a href="#" onclick="showSection('challenges')">Challenges</a></li>
             <li><a href="#" onclick="showSection('submit')">Submit a Problem</a></li>
             <li><a href="#" onclick="showSection('teams')">Teams</a></li>
@@ -166,52 +375,27 @@
 
 <!-- Video Section -->
 <!-- Top CTA Banner -->
-<div id="topCta"
-     style="position:sticky; top:0; z-index:9999; background:linear-gradient(90deg,#0f172a,#1e293b);
-            color:#fff; padding:.75rem 1rem; border-bottom:1px solid rgba(255,255,255,.12);">
-  <div style="max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:1rem;">
-    <!-- Icon -->
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z"></path>
-    </svg>
 
-    <!-- Message -->
-    <div style="flex:1; font-size:.95rem;">
-      <strong>Watch our video</strong> to learn how Uprising Medical empowers healthcare innovation.
-    </div>
-
-    <!-- Actions -->
-    <div style="display:flex; gap:.5rem;">
-      <button id="watchBtn"
-        style="appearance:none; border:none; padding:.5rem .9rem; border-radius:.5rem; font-weight:600;
-               background:#22c55e; color:#0b1b12; cursor:pointer;">
-        Watch the video
-      </button>
-      <button id="toggleBtn"
-        style="appearance:none; border:1px solid rgba(255,255,255,.25); padding:.5rem .9rem; border-radius:.5rem;
-               background:transparent; color:#fff; font-weight:600; cursor:pointer;">
-        Pause
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Your existing video section -->
 <section id="home" class="content-section active" style="min-height:100vh">
   <div class="container" style="position:relative; min-height:100vh; overflow:hidden;">
     <video id="heroVideo" autoplay muted loop playsinline
            style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;">
-      <source src="/media/hero.mp4" type="video/mp4">
+      <source src="/media/hero-original.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
     <div style="position:absolute; inset:0; background:rgba(0,0,0,.35); z-index:1;"></div>
 
-    <!-- Optional on-video tiny control (can remove if you prefer just the top banner) -->
-    <div style="position:absolute; bottom:20px; right:20px; z-index:2;">
+    <!-- one control cluster (no duplicates) -->
+    <div style="position:absolute; bottom:20px; right:20px; z-index:2; display:flex; gap:.5rem;">
       <button id="inlineToggle"
-        style="appearance:none; border:none; padding:.4rem .7rem; border-radius:.375rem; font-weight:600;
-               background:rgba(255,255,255,.85); color:#0f172a; cursor:pointer;">
+        style="appearance:none;border:none;padding:.4rem .7rem;border-radius:.375rem;font-weight:600;
+               background:rgba(255,255,255,.85);color:#0f172a;cursor:pointer;">
         Pause
+      </button>
+      <button id="soundBtn"
+        style="appearance:none;border:none;padding:.4rem .7rem;border-radius:.375rem;font-weight:600;
+               background:rgba(255,255,255,.85);color:#0f172a;cursor:pointer;">
+        Unmute
       </button>
     </div>
   </div>
@@ -219,190 +403,194 @@
 
 <script>
   const video = document.getElementById('heroVideo');
-  const watchBtn = document.getElementById('watchBtn');
-  const toggleBtn = document.getElementById('toggleBtn');
+  const watchBtn = document.getElementById('watchBtn');   // may be null
+  const toggleBtn = document.getElementById('toggleBtn'); // may be null
   const inlineToggle = document.getElementById('inlineToggle');
+  const soundBtn = document.getElementById('soundBtn');
 
   function setButtonsPlayingState(isPlaying) {
     const text = isPlaying ? 'Pause' : 'Play';
-    toggleBtn.textContent = text;
-    inlineToggle.textContent = text;
+    if (toggleBtn) toggleBtn.textContent = text;
+    if (inlineToggle) inlineToggle.textContent = text;
+  }
+  function updateSoundLabel() {
+    if (soundBtn) soundBtn.textContent = video.muted ? 'Unmute' : 'Mute';
   }
 
-  // Smooth scroll to video and play
-  watchBtn.addEventListener('click', async () => {
-    document.getElementById('home').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    try { await video.play(); } catch (e) {}
-    setButtonsPlayingState(true);
-  });
-
-  // Toggle from banner
-  toggleBtn.addEventListener('click', async () => {
-    if (video.paused) {
-      try { await video.play(); } catch (e) {}
+  if (watchBtn) {
+    watchBtn.addEventListener('click', async () => {
+      document.getElementById('home').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try { await video.play(); } catch {}
       setButtonsPlayingState(true);
-    } else {
-      video.pause();
-      setButtonsPlayingState(false);
+    });
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', async () => {
+      if (video.paused) { try { await video.play(); } catch {} setButtonsPlayingState(true); }
+      else { video.pause(); setButtonsPlayingState(false); }
+    });
+  }
+
+  if (inlineToggle) {
+    inlineToggle.addEventListener('click', async () => {
+      if (video.paused) { try { await video.play(); } catch {} setButtonsPlayingState(true); }
+      else { video.pause(); setButtonsPlayingState(false); }
+    });
+  }
+
+  if (soundBtn) {
+    soundBtn.addEventListener('click', async () => {
+      video.muted = !video.muted;
+      if (!video.muted) {
+        video.volume = 0.6;
+        try { await video.play(); } catch {}
+      }
+      updateSoundLabel();
+    });
+  }
+
+  // Tap video to unmute quickly
+  video.addEventListener('click', async () => {
+    if (video.muted) {
+      video.muted = false;
+      video.volume = 0.6;
+      try { await video.play(); } catch {}
+      updateSoundLabel();
     }
   });
 
-  // Toggle from inline button
-  inlineToggle.addEventListener('click', () => {
-    if (video.paused) {
-      video.play();
-      setButtonsPlayingState(true);
-    } else {
-      video.pause();
-      setButtonsPlayingState(false);
-    }
-  });
-
-  // Keep label in sync if user uses native controls or autoplay fails
   video.addEventListener('play', () => setButtonsPlayingState(true));
   video.addEventListener('pause', () => setButtonsPlayingState(false));
+  video.addEventListener('volumechange', updateSoundLabel);
+
+  // init labels
+  setButtonsPlayingState(!video.paused);
+  updateSoundLabel();
 </script>
 
+<!-- ABOUT page (only shows when you call showSection('about')) -->
 <section id="about" class="content-section">
   <div class="container">
-    <!-- Hero -->
-    <div class="about-hero card">
-      <h1 style="margin:.2rem 0 .6rem">About Uprising Medical</h1>
-      <p style="opacity:.95;max-width:700px;margin:0 auto">
-        We connect medical professionals with engineering students to co-create real, deployable healthcare solutions.
-      </p>
-    </div>
 
-    <!-- Team -->
-    <!-- ===== Team Section (drop-in) ===== -->
-<section class="team-section">
-  <h2>Meet Our Team</h2>
+    <!-- ===== Team Section ===== -->
+    <section class="team-section">
+      <h2>Meet Our Team</h2>
 
-  <!-- Our Story -->
-  <div class="team-intro card" style="padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); margin-bottom:1rem;">
-    <h3 style="margin:.25rem 0 .5rem;">Our Story</h3>
-    <p style="margin:0; line-height:1.6;">
-      Uprising Medical was founded on <strong>November 19, 2024</strong>, by <strong>Dhruvrajsinh Chauhan</strong> and later joined by <strong>Leul Mesfin</strong>, with the vision of bridging the gap between real-world healthcare challenges and innovative problem solvers. The platform enables doctors, professionals, and the public to submit medical challenges, which engineering students then collaborate on to develop creative and practical solutions. Our mission is to foster innovation, connect communities, and enhance healthcare accessibility through collaborative problem-solving. Guided by our vision of accelerating medical innovation, our dedicated volunteer team works entirely without compensation, driven by a shared commitment to improving lives through the intersection of engineering and healthcare.
-    </p>
-  </div>
+      <!-- Our Story -->
+      <div class="team-intro card" style="padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); margin-bottom:.75rem;">
+        <h3 style="margin:.25rem 0 .4rem;">Our Story</h3>
+        <p style="margin:0; line-height:1.6;">
+          Uprising Medical was founded on <strong>November 19, 2024</strong>, by <strong>Dhruvrajsinh Chauhan</strong> and later joined by <strong>Leul Mesfin</strong>, with the vision of bridging the gap between real-world healthcare challenges and innovative problem solvers. The platform enables doctors, professionals, and the public to submit medical challenges, which engineering students then collaborate on to develop creative and practical solutions. Our mission is to foster innovation, connect communities, and enhance healthcare accessibility through collaborative problem-solving. Guided by our vision of accelerating medical innovation, our dedicated volunteer team works entirely without compensation, driven by a shared commitment to improving lives through the intersection of engineering and healthcare.
+        </p>
+      </div>
 
-  <div class="team-grid">
-    <!-- Founder -->
-    <div class="team-card" onclick="openAboutProfile('founder1')">
-      <div class="profile-photo">
-        <img src="/media/team/dc.jpg" alt="Photo of Dhruvrajsinh Chauhan"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='DC';">
-      </div>
-      <div class="team-content">
-        <h3>Dhruvrajsinh Chauhan</h3>
-        <div class="role">Founder</div>
-        <p>Founder and guiding force behind Uprising Medical.</p>
-      </div>
-    </div>
+      <div class="team-grid">
+        <!-- Founder -->
+        <div class="team-card" onclick="openAboutProfile('founder1')">
+          <div class="profile-photo">
+            <img src="/media/team/dc.jpg" alt="Photo of Dhruvrajsinh Chauhan"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='DC';">
+          </div>
+          <div class="team-content">
+            <h3>Dhruvrajsinh Chauhan</h3>
+            <div class="role">Founder</div>
+            <p>Founder and guiding force behind Uprising Medical.</p>
+          </div>
+        </div>
 
-    <!-- Co-Founder -->
-    <div class="team-card" onclick="openAboutProfile('cofounder1')">
-      <div class="profile-photo">
-        <img src="/media/team/lm.jpg" alt="Photo of Leul Mesfin"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='LM';">
-      </div>
-      <div class="team-content">
-        <h3>Leul Mesfin</h3>
-        <div class="role">Co-Founder</div>
-        <p>Biomedical Engineering (ASU), specializing in biomedical devices.</p>
-      </div>
-    </div>
+        <!-- Co-Founder -->
+        <div class="team-card" onclick="openAboutProfile('cofounder1')">
+          <div class="profile-photo">
+            <img src="/media/team/lm.jpg" alt="Photo of Leul Mesfin"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='LM';">
+          </div>
+          <div class="team-content">
+            <h3>Leul Mesfin</h3>
+            <div class="role">Co-Founder</div>
+            <p>Biomedical Engineering (ASU), specializing in biomedical devices.</p>
+          </div>
+        </div>
 
-    <!-- Technical Director -->
-    <div class="team-card" onclick="openAboutProfile('tech-director')">
-      <div class="profile-photo">
-        <img src="/media/team/id.jpg" alt="Photo of Ishita Deshpande"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='ID';">
-      </div>
-      <div class="team-content">
-        <h3>Ishita Deshpande</h3>
-        <div class="role">Technical Director</div>
-        <p>Leads UI and platform functionality; JavaScript/React focus.</p>
-      </div>
-    </div>
+        <!-- Technical Director -->
+        <div class="team-card" onclick="openAboutProfile('tech-director')">
+          <div class="profile-photo">
+            <img src="/media/team/id.jpg" alt="Photo of Ishita Deshpande"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='ID';">
+          </div>
+          <div class="team-content">
+            <h3>Ishita Deshpande</h3>
+            <div class="role">Technical Director</div>
+            <p>Leads UI and platform functionality; JavaScript/React focus.</p>
+          </div>
+        </div>
 
-    <!-- Social Media Director -->
-    <div class="team-card" onclick="openAboutProfile('social-director')">
-      <div class="profile-photo">
-        <img src="/media/team/tp.jpg" alt="Photo of Tristan Puskarov"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='TP';">
-      </div>
-      <div class="team-content">
-        <h3>Tristan Puskarov</h3>
-        <div class="role">Social Media Director</div>
-        <p>Creates engaging content to amplify mission and outreach.</p>
-      </div>
-    </div>
+        <!-- Social Media Director -->
+        <div class="team-card" onclick="openAboutProfile('social-director')">
+          <div class="profile-photo">
+            <img src="/media/team/tp.jpg" alt="Photo of Tristan Puskarov"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='TP';">
+          </div>
+          <div class="team-content">
+            <h3>Tristan Puskarov</h3>
+            <div class="role">Social Media Director</div>
+            <p>Creates engaging content to amplify mission and outreach.</p>
+          </div>
+        </div>
 
-    <!-- PR Director -->
-    <div class="team-card" onclick="openAboutProfile('pr-director')">
-      <div class="profile-photo">
-        <img src="/media/team/gn.jpg" alt="Photo of Gwendylin Nguyen"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='GN';">
-      </div>
-      <div class="team-content">
-        <h3>Gwendylin Nguyen</h3>
-        <div class="role">PR Director</div>
-        <p>Strengthens ties with clinicians and builds the ASU club.</p>
-      </div>
-    </div>
+        <!-- PR Director -->
+        <div class="team-card" onclick="openAboutProfile('pr-director')">
+          <div class="profile-photo">
+            <img src="/media/team/gn.jpg" alt="Photo of Gwendylin Nguyen"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='GN';">
+          </div>
+          <div class="team-content">
+            <h3>Gwendylin Nguyen</h3>
+            <div class="role">PR Director</div>
+            <p>Strengthens ties with clinicians and builds the ASU club.</p>
+          </div>
+        </div>
 
-    <!-- Operations Director -->
-    <div class="team-card" onclick="openAboutProfile('ops-director')">
-      <div class="profile-photo">
-        <img src="/media/team/sg.jpg" alt="Photo of Suprathik Gangone"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='SG';">
-      </div>
-      <div class="team-content">
-        <h3>Suprathik Gangone</h3>
-        <div class="role">Operations Director</div>
-        <p>Operations, leadership, and community impact initiatives.</p>
-      </div>
-    </div>
+        <!-- Operations Director -->
+        <div class="team-card" onclick="openAboutProfile('ops-director')">
+          <div class="profile-photo">
+            <img src="/media/team/sg.jpg" alt="Photo of Suprathik Gangone"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='SG';">
+          </div>
+          <div class="team-content">
+            <h3>Suprathik Gangone</h3>
+            <div class="role">Operations Director</div>
+            <p>Operations, leadership, and community impact initiatives.</p>
+          </div>
+        </div>
 
-    <!-- Technical Executive -->
-    <div class="team-card" onclick="openAboutProfile('tech-exec-rk')">
-      <div class="profile-photo">
-        <img src="/media/team/rk.jpg" alt="Photo of Rohan Kshatriya"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='RK';">
-      </div>
-      <div class="team-content">
-        <h3>Rohan Kshatriya</h3>
-        <div class="role">Technical Executive</div>
-        <p>Designs infrastructure, backend features, and data integrations.</p>
-      </div>
-    </div>
+        <!-- Technical Executive -->
+        <div class="team-card" onclick="openAboutProfile('tech-exec-rk')">
+          <div class="profile-photo">
+            <img src="/media/team/rk.jpg" alt="Photo of Rohan Kshatriya"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='RK';">
+          </div>
+          <div class="team-content">
+            <h3>Rohan Kshatriya</h3>
+            <div class="role">Technical Executive</div>
+            <p>Designs infrastructure, backend features, and data integrations.</p>
+          </div>
+        </div>
 
-    <!-- Technical Executive -->
-    <div class="team-card" onclick="openAboutProfile('tech-exec-sa')">
-      <div class="profile-photo">
-        <img src="/media/team/sa.jpg" alt="Photo of Sarthak Avaiya"
-             loading="lazy" onerror="this.remove(); this.parentElement.textContent='SA';">
+        <!-- Technical Executive -->
+        <div class="team-card" onclick="openAboutProfile('tech-exec-sa')">
+          <div class="profile-photo">
+            <img src="/media/team/sa.jpg" alt="Photo of Sarthak Avaiya"
+                 loading="lazy" onerror="this.remove(); this.parentElement.textContent='SA';">
+          </div>
+          <div class="team-content">
+            <h3>Sarthak Avaiya</h3>
+            <div class="role">Technical Executive</div>
+            <p>Builds user-friendly solutions bringing impact to communities.</p>
+          </div>
+        </div>
       </div>
-      <div class="team-content">
-        <h3>Sarthak Avaiya</h3>
-        <div class="role">Technical Executive</div>
-        <p>Builds user-friendly solutions bringing impact to communities.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Minimal styles (use once, or remove if you already have these) -->
-<style>
-  .team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
-  .team-card { display:flex; gap:.9rem; padding:1rem; border-radius:.75rem; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); cursor:pointer; }
-  .profile-photo { width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:700; color:#374151; flex:0 0 72px; }
-  .profile-photo img { width:100%; height:100%; object-fit:cover; display:block; }
-  .team-content h3 { margin:0 0 .2rem; }
-  .team-content .role { font-size:.9rem; color:#4b5563; margin-bottom:.35rem; }
-</style>
-
+    </section>
 <script>
   // Modal data & wiring (uses your existing #aboutProfileModal and #aboutModalContent)
   const teamProfiles = {
@@ -555,7 +743,6 @@
   <div id="pendingProblems" class="list" style="margin-top:1rem;"></div>
 </div>
 
-
 </section>
 
 <section id="signup" class="content-section">
@@ -639,31 +826,32 @@
 <footer><p>&copy; 2025 Uprising Medical</p></footer>
 
 <script>
-// Navigation
 function showSection(sectionId) {
+  // hide everything
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(sectionId)?.classList.add('active');
 
-  // highlight active nav link
+  // show the requested section
+  const target = document.getElementById(sectionId);
+  if (!target) { console.warn(`No section with id="${sectionId}" found`); return; }
+  target.classList.add('active');
+
+  // highlight the active nav item
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  const link = [...document.querySelectorAll('.nav-links a')]
-    .find(a => a.getAttribute('onclick')?.includes(sectionId));
-  if (link) link.classList.add('active');
+  const activeLink = Array.from(document.querySelectorAll('.nav-links a'))
+    .find(a => (a.getAttribute('onclick') || '').includes(`'${sectionId}'`));
+  if (activeLink) activeLink.classList.add('active');
 
+  // lazy-load page data
+  if (sectionId === 'challenges' && typeof loadChallenges === 'function') loadChallenges();
+  if (sectionId === 'teams'      && typeof loadTeams === 'function')      loadTeams();
+  if (sectionId === 'admin') {
+    if (typeof loadPendingProblems === 'function') loadPendingProblems();
+    if (typeof loadJoinRequests    === 'function') loadJoinRequests();
+  }
+
+  // scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (sectionId === 'challenges') loadChallenges();
-  if (sectionId === 'teams') loadTeams();
-  if (sectionId === 'admin') { loadPendingProblems(); loadJoinRequests(); }
 }
-
-// default view
-document.addEventListener('DOMContentLoaded', () => {
-  showSection('home');
-  loadChallenges(); // warm cache
-});
-
-
-
 
 // Submit Problem
 // Submit Problem
